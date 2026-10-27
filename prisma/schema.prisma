@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Bus {
+  id        Int           @id @default(autoincrement())
+  busNumber String        @unique
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  locations BusLocation[]
+  gpsDevices GpsDevice[]
+}
+
+model BusLocation {
+  id        Int      @id @default(autoincrement())
+  busId     Int
+  latitude  Float
+  longitude Float
+  speed     Float    @default(0)
+  recordedAt DateTime @default(now())
+
+  bus Bus @relation(fields: [busId], references: [id], onDelete: Cascade)
+
+  @@index([busId, recordedAt])
+}
+model GpsDevice {
+  id         Int      @id @default(autoincrement())
+  name       String
+  keyHash    String   @unique
+  busId      Int
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  lastUsedAt DateTime?
+
+  bus Bus @relation(fields: [busId], references: [id], onDelete: Cascade)
+
+  @@index([busId])
+}
