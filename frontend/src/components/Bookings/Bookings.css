@@ -1,0 +1,717 @@
+/* ==========================================================================
+   BusBondhu Phase 8 — My Bookings Styling (Claymorphism)
+   Palette: #55372D, #F7EEDF, #C96535, #F0E3D1
+   ========================================================================== */
+
+.my-bookings-container {
+  max-width: 1040px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 16px 24px 64px;
+}
+
+/* ==========================================================================
+   Top Navigation & Heading
+   ========================================================================== */
+
+.bookings-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.bookings-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--clay-cream-surface);
+  border: 1.5px solid var(--clay-border);
+  color: var(--clay-brown);
+  font-size: 0.86rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: var(--clay-pill-shadow);
+  transition: all 0.2s ease;
+}
+
+.bookings-back-btn:hover {
+  background: var(--clay-beige);
+  color: var(--clay-orange);
+  transform: translateX(-2px);
+}
+
+.bookings-pill-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: #FFFDF9;
+  border: 1px solid var(--clay-border);
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: var(--clay-orange);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: var(--clay-pill-shadow);
+}
+
+.bookings-heading-section {
+  margin-bottom: 22px;
+}
+
+.bookings-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 850;
+  color: var(--clay-orange);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.bookings-heading-section h1 {
+  margin: 0 0 6px;
+  font-size: clamp(1.6rem, 3.2vw, 2.2rem);
+  font-weight: 900;
+  color: var(--clay-brown-deep);
+  letter-spacing: -0.03em;
+}
+
+.bookings-subtext {
+  margin: 0;
+  font-size: 0.94rem;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Development Fixture Notice Banner
+   ========================================================================== */
+
+.fixture-notice-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, #FFF9F2 0%, #FBF1E2 100%);
+  border: 1.5px solid rgba(201, 101, 53, 0.35);
+  box-shadow: var(--clay-card-shadow);
+  margin-bottom: 26px;
+}
+
+.notice-icon-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 1.5px solid var(--clay-border);
+  display: grid;
+  place-items: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  box-shadow: inset 0 2px 4px rgba(85, 55, 45, 0.08);
+}
+
+.notice-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.notice-pill {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--clay-orange);
+  color: #FFFFFF;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.notice-subtag {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+.notice-text p {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: var(--clay-brown);
+}
+
+/* ==========================================================================
+   Filter Tabs Navigation
+   ========================================================================== */
+
+.bookings-filter-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.filter-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  background: var(--clay-cream-surface);
+  border: 1.5px solid var(--clay-border);
+  color: var(--clay-brown);
+  font-size: 0.86rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: var(--clay-pill-shadow);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.filter-tab:hover {
+  background: var(--clay-beige);
+  color: var(--clay-orange);
+  transform: translateY(-1px);
+}
+
+.filter-tab.active {
+  background: var(--clay-brown-deep);
+  color: #F7EEDF;
+  border-color: var(--clay-brown-deep);
+  box-shadow: 0 4px 12px rgba(85, 55, 45, 0.25);
+}
+
+.tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: rgba(85, 55, 45, 0.12);
+  color: var(--clay-brown-deep);
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.filter-tab.active .tab-count {
+  background: rgba(247, 238, 223, 0.25);
+  color: #FFFFFF;
+}
+
+.tab-count.count-green {
+  background: rgba(46, 133, 64, 0.15);
+  color: #2E8540;
+}
+
+.filter-tab.active .tab-count.count-green {
+  background: rgba(46, 133, 64, 0.4);
+  color: #D4F4DD;
+}
+
+.tab-count.count-orange {
+  background: rgba(201, 101, 53, 0.15);
+  color: var(--clay-orange);
+}
+
+/* ==========================================================================
+   Booking Cards Stack
+   ========================================================================== */
+
+.bookings-cards-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.booking-clay-card {
+  background: #FFFFFF;
+  border: 1.5px solid var(--clay-border);
+  border-radius: 20px;
+  padding: 24px 28px;
+  box-shadow: var(--clay-card-shadow), 0 8px 24px rgba(85, 55, 45, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.booking-clay-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--clay-card-shadow), 0 12px 28px rgba(85, 55, 45, 0.09);
+  border-color: rgba(201, 101, 53, 0.35);
+}
+
+/* Top Row */
+.card-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.operator-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.operator-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--clay-cream-surface);
+  border: 1.5px solid var(--clay-border);
+  display: grid;
+  place-items: center;
+  font-size: 1.3rem;
+  box-shadow: var(--clay-pill-shadow);
+  flex-shrink: 0;
+}
+
+.operator-name {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--clay-brown-deep);
+  line-height: 1.2;
+}
+
+.bus-category-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.status-badge-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.session-pill-tag {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--clay-beige);
+  border: 1px solid var(--clay-border);
+  color: var(--clay-brown);
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.status-dot {
+  font-size: 0.65rem;
+}
+
+.pill-upcoming {
+  background: #EAF7EC;
+  border: 1px solid #C4EBC8;
+  color: #1F6B2F;
+}
+
+.pill-completed {
+  background: #F3EFEA;
+  border: 1px solid #DED7CE;
+  color: #695147;
+}
+
+.pill-cancelled {
+  background: #FDF0EC;
+  border: 1px solid #F6D2C4;
+  color: #A3431D;
+}
+
+/* Reference Strip */
+.booking-ref-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  padding: 6px 12px;
+  background: #FFFDF9;
+  border-radius: 8px;
+  border: 1px solid var(--clay-border);
+  width: fit-content;
+}
+
+.ref-label {
+  font-weight: 700;
+}
+
+.ref-value.code-font {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 900;
+  color: var(--clay-brown-deep);
+}
+
+.ref-value.bold {
+  font-weight: 800;
+  color: var(--clay-brown);
+}
+
+.ref-divider {
+  color: var(--clay-border);
+}
+
+/* Journey Timeline */
+.card-journey-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: var(--clay-cream-surface);
+  border-radius: 14px;
+  border: 1px solid var(--clay-border);
+}
+
+.journey-stop {
+  display: flex;
+  flex-direction: column;
+}
+
+.journey-stop.destination {
+  text-align: right;
+}
+
+.time-text {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--clay-orange);
+}
+
+.city-text {
+  font-size: 0.95rem;
+  font-weight: 850;
+  color: var(--clay-brown-deep);
+  margin-top: 1px;
+}
+
+.point-sub {
+  font-size: 0.7rem;
+  font-weight: 750;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.journey-path-graphic {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 120px;
+}
+
+.duration-tag {
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: var(--clay-brown);
+}
+
+.path-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.bar-circle {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--clay-orange);
+  flex-shrink: 0;
+}
+
+.bar-line {
+  flex: 1;
+  height: 2px;
+  background: var(--clay-border);
+}
+
+.bar-arrow {
+  color: var(--clay-orange);
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+/* Meta Grid */
+.card-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  padding-top: 4px;
+}
+
+.meta-box {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.box-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.seats-tag-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.seat-clay-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--clay-beige);
+  border: 1px solid var(--clay-border);
+  color: var(--clay-orange);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.box-val {
+  font-size: 0.9rem;
+  color: var(--clay-brown-deep);
+}
+
+.box-val.bold {
+  font-weight: 850;
+}
+
+.box-val.fare-price {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--clay-brown-deep);
+}
+
+.pay-mode-sub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 650;
+}
+
+/* Action Footer */
+.card-actions-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 14px;
+  border-top: 1.5px solid #F0E3D1;
+  flex-wrap: wrap;
+}
+
+.actions-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.refund-status-note {
+  font-size: 0.8rem;
+  color: #2E8540;
+  font-weight: 750;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 0.84rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.track-btn {
+  background: var(--clay-cream-surface);
+  border: 1.5px solid var(--clay-border);
+  color: var(--clay-brown);
+  box-shadow: var(--clay-pill-shadow);
+}
+
+.track-btn:hover {
+  background: var(--clay-beige);
+  color: var(--clay-orange);
+  transform: translateY(-1px);
+}
+
+.rebook-btn {
+  background: var(--clay-cream-surface);
+  border: 1.5px solid var(--clay-border);
+  color: var(--clay-brown);
+}
+
+.rebook-btn:hover {
+  background: var(--clay-beige);
+  color: var(--clay-orange);
+}
+
+.ticket-btn {
+  background: linear-gradient(135deg, var(--clay-orange) 0%, #B8582B 100%);
+  color: #FFFFFF;
+  border: 1px solid rgba(85, 55, 45, 0.12);
+  box-shadow: 0 4px 12px rgba(201, 101, 53, 0.25);
+}
+
+.ticket-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(201, 101, 53, 0.35);
+}
+
+/* ==========================================================================
+   Empty State
+   ========================================================================== */
+
+.bookings-empty-card {
+  padding: 48px 32px;
+  text-align: center;
+  background: var(--clay-cream-surface);
+  border: 2px dashed var(--clay-border);
+  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.empty-icon-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #FFFDF9;
+  border: 1.5px solid var(--clay-border);
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+  margin-bottom: 16px;
+  box-shadow: var(--clay-pill-shadow);
+}
+
+.bookings-empty-card h3 {
+  margin: 0 0 8px;
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: var(--clay-brown-deep);
+}
+
+.empty-desc {
+  margin: 0 0 20px;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  max-width: 420px;
+  line-height: 1.5;
+}
+
+.empty-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.empty-btn-secondary {
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
+  background: #FFFDF9;
+  border: 1.5px solid var(--clay-border);
+  color: var(--clay-brown);
+  font-size: 0.88rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: var(--clay-pill-shadow);
+}
+
+.empty-btn-secondary:hover {
+  background: var(--clay-beige);
+}
+
+.empty-btn-primary {
+  padding: 10px 22px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(135deg, var(--clay-orange) 0%, #B8582B 100%);
+  color: #FFFFFF;
+  border: 1px solid rgba(85, 55, 45, 0.12);
+  font-size: 0.88rem;
+  font-weight: 850;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(201, 101, 53, 0.28);
+}
+
+.empty-btn-primary:hover {
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   Responsive Adaptations
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .my-bookings-container {
+    padding: 14px 16px 48px;
+  }
+
+  .booking-clay-card {
+    padding: 18px 16px;
+  }
+
+  .card-journey-row {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .journey-stop.destination {
+    text-align: center;
+  }
+
+  .card-actions-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actions-left,
+  .actions-right {
+    width: 100%;
+  }
+
+  .action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

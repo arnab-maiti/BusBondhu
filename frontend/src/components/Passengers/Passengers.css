@@ -1,0 +1,840 @@
+/* ==========================================================================
+   Passenger Details UI — Claymorphism Styling
+   ========================================================================== */
+
+.passengers-page-container {
+  max-width: 1240px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 16px 28px 64px;
+}
+
+/* ==========================================================================
+   Top Header & Navigation Bar
+   ========================================================================== */
+
+.passengers-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.back-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--clay-cream-surface);
+  border: 1.5px solid var(--clay-border);
+  color: var(--clay-brown);
+  font-size: 0.86rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: var(--clay-pill-shadow);
+  transition: all 0.2s ease;
+}
+
+.back-nav-btn:hover {
+  background: var(--clay-beige);
+  color: var(--clay-orange);
+  transform: translateX(-2px);
+}
+
+.booking-stepper-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: var(--radius-pill);
+  background: #FFFDF9;
+  border: 1px solid var(--clay-border);
+  font-size: 0.8rem;
+  font-weight: 700;
+  box-shadow: var(--clay-pill-shadow);
+}
+
+.step-complete {
+  color: #2E8540;
+}
+
+.step-arrow {
+  color: var(--text-muted);
+}
+
+.step-active {
+  color: var(--clay-orange);
+  font-weight: 900;
+}
+
+/* Fallback Notice Banner */
+.fallback-banner {
+  padding: 12px 18px;
+  border-radius: var(--radius-md);
+  background: #FDF1DB;
+  border: 1.5px solid #F1D9A7;
+  color: #7D4C10;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  box-shadow: var(--clay-pill-shadow);
+}
+
+.banner-badge {
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: #C96535;
+  color: #FFFFFF;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+.fallback-banner p {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+/* Page Heading */
+.passengers-page-heading {
+  margin-bottom: 24px;
+}
+
+.heading-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--clay-orange);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.passengers-page-heading h1 {
+  margin: 4px 0 6px;
+  font-size: clamp(1.6rem, 3.2vw, 2.2rem);
+  font-weight: 900;
+  color: var(--clay-brown-deep);
+  letter-spacing: -0.04em;
+}
+
+.heading-subtext {
+  margin: 0;
+  font-size: 0.94rem;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Two-Column Main Grid Layout
+   ========================================================================== */
+
+.passengers-main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(340px, 0.9fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.passenger-cards-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+/* ==========================================================================
+   Passenger Card (Claymorphic)
+   ========================================================================== */
+
+.passenger-form-card {
+  padding: 24px;
+  border-radius: var(--radius-xl);
+  background: var(--clay-cream-surface);
+  border: 1.5px solid var(--clay-border);
+  box-shadow: var(--clay-card-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  transition: all 0.2s ease;
+}
+
+.passenger-form-card:hover {
+  border-color: var(--clay-beige-dark);
+}
+
+.passenger-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1.5px solid var(--clay-border);
+}
+
+.passenger-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.passenger-num-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #FAF0E9 0%, #F5E2D6 100%);
+  color: var(--clay-orange);
+  border: 1.5px solid rgba(201, 101, 53, 0.3);
+  font-size: 0.92rem;
+  font-weight: 900;
+  display: grid;
+  place-items: center;
+  box-shadow: var(--clay-pill-shadow);
+}
+
+.passenger-card-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--clay-brown-deep);
+}
+
+.passenger-seat-tag {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.passenger-seat-tag strong {
+  color: var(--clay-orange);
+}
+
+/* Form Inputs Grid */
+.passenger-inputs-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(110px, 0.7fr) minmax(0, 1.3fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.clay-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--clay-brown);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.req-star {
+  color: #C96535;
+}
+
+.clay-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  min-height: 48px;
+  border-radius: var(--radius-sm);
+  background: #FFFFFF;
+  border: 1.5px solid var(--clay-beige-dark);
+  box-shadow: var(--clay-inset-shadow);
+  transition: all 0.2s ease;
+}
+
+.clay-input-wrapper:focus-within {
+  border-color: var(--clay-orange);
+  outline: 3px solid rgba(201, 101, 53, 0.35);
+}
+
+.clay-input-wrapper.has-error {
+  border-color: #D32F2F;
+  background: #FFF8F8;
+}
+
+.clay-input-wrapper.has-error:focus-within {
+  outline: 3px solid rgba(211, 47, 47, 0.35);
+}
+
+.field-icon {
+  font-size: 1rem;
+  opacity: 0.85;
+}
+
+.clay-input-wrapper input {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--text-main);
+  font-size: 0.92rem;
+  font-weight: 600;
+  outline: none;
+}
+
+.inline-err-msg {
+  font-size: 0.72rem;
+  font-weight: 750;
+  color: #C62828;
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+/* Gender Selection Radios */
+.gender-radios-row {
+  display: flex;
+  gap: 6px;
+  min-height: 48px;
+  align-items: center;
+}
+
+.gender-chip-label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 8px;
+  border-radius: var(--radius-sm);
+  background: #FFFDF9;
+  border: 1.5px solid var(--clay-border);
+  box-shadow: var(--clay-pill-shadow);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 750;
+  color: var(--clay-brown);
+  transition: all 0.18s ease;
+  user-select: none;
+}
+
+.gender-chip-label input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chip-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid var(--clay-beige-dark);
+  background: #FFFFFF;
+}
+
+.gender-chip-label:hover {
+  background: var(--clay-beige);
+}
+
+.gender-chip-label.selected {
+  background: var(--clay-orange-soft);
+  border-color: var(--clay-orange);
+  color: var(--clay-orange);
+  box-shadow: 0 3px 8px rgba(201, 101, 53, 0.22);
+}
+
+.gender-chip-label.selected .chip-indicator {
+  background: var(--clay-orange);
+  border-color: var(--clay-orange);
+}
+
+/* ==========================================================================
+   Contact Details Card
+   ========================================================================== */
+
+.contact-details-card {
+  padding: 24px;
+  border-radius: var(--radius-xl);
+  background: var(--clay-cream-surface);
+  border: 1.5px solid var(--clay-border);
+  box-shadow: var(--clay-card-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.contact-card-header {
+  display: flex;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1.5px solid var(--clay-border);
+}
+
+.contact-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.contact-icon-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: #E5F3E7;
+  color: #1E5C2A;
+  border: 1.5px solid #B4DEBE;
+  font-size: 1.15rem;
+  display: grid;
+  place-items: center;
+  box-shadow: var(--clay-pill-shadow);
+}
+
+.contact-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--clay-brown-deep);
+}
+
+.contact-subtitle {
+  margin: 3px 0 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.contact-inputs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.phone-wrapper {
+  padding-left: 8px;
+}
+
+.country-code-pill {
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--clay-beige);
+  color: var(--clay-brown);
+  font-size: 0.78rem;
+  font-weight: 800;
+  margin-right: 4px;
+}
+
+/* ==========================================================================
+   Booking Summary Sidebar
+   ========================================================================== */
+
+.passenger-summary-sidebar {
+  position: sticky;
+  top: 24px;
+}
+
+.passenger-summary-sidebar .summary-card-inner {
+  padding: 24px;
+  border-radius: var(--radius-xl);
+  background: var(--clay-cream-surface);
+  border: 1.5px solid var(--clay-border);
+  box-shadow: var(--clay-card-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.passenger-summary-sidebar .summary-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--clay-brown-deep);
+}
+
+.demo-fallback-badge {
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: #FDF1DB;
+  border: 1px solid #F1D9A7;
+  color: #7D4C10;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  font-weight: 650;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fallback-pill {
+  width: fit-content;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #C96535;
+  color: #FFFFFF;
+  font-size: 0.65rem;
+  font-weight: 900;
+}
+
+.summary-route-box {
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: #FFFDF9;
+  border: 1px solid var(--clay-border);
+  box-shadow: var(--clay-pill-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.route-endpoints {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.route-endpoints .route-city {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--clay-brown-deep);
+}
+
+.route-endpoints .route-arrow {
+  color: var(--clay-orange);
+  font-size: 1rem;
+}
+
+.route-operator-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.operator-chip {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.bus-chip {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.route-schedule-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.seats-display-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--clay-border);
+}
+
+.seats-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--clay-brown);
+}
+
+.seats-badges-wrap {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.seat-num-badge {
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--clay-orange-soft);
+  color: var(--clay-orange);
+  font-size: 0.74rem;
+  font-weight: 800;
+  border: 1px solid rgba(201, 101, 53, 0.25);
+}
+
+/* Fare Box */
+.summary-fare-box {
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: #FFFDF9;
+  border: 1px solid var(--clay-border);
+  box-shadow: var(--clay-pill-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fare-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.86rem;
+  color: var(--clay-brown);
+  font-weight: 700;
+}
+
+.fare-row.sub {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.fare-free {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #E5F3E7;
+  color: #1E5C2A;
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.fare-divider {
+  height: 1px;
+  background: var(--clay-border);
+  margin: 6px 0;
+}
+
+.fare-row.total {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--clay-brown-deep);
+}
+
+.total-val {
+  font-size: 1.5rem;
+  color: var(--clay-orange);
+}
+
+/* Continue Button */
+.continue-passenger-btn {
+  width: 100%;
+  padding: 15px 20px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(180deg, #D66F3E 0%, #C96535 55%, #B75324 100%);
+  border: 1px solid #A84E22;
+  color: #FFFFFF;
+  font-size: 1rem;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: var(--clay-btn-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.continue-passenger-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--clay-btn-hover-shadow);
+}
+
+.continue-passenger-btn:disabled {
+  background: #DECFC0;
+  border-color: #CBB9A7;
+  color: #8C7B6C;
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.85;
+}
+
+.form-incomplete-hint {
+  margin: 0;
+  font-size: 0.74rem;
+  color: #A0522D;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.summary-trust-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+/* ==========================================================================
+   Passenger Confirmation Modal
+   ========================================================================== */
+
+.passenger-modal-card {
+  width: 100%;
+  max-width: 520px;
+  border-radius: var(--radius-xl);
+  background: var(--clay-cream-surface);
+  border: 2px solid var(--clay-border);
+  box-shadow: 0 24px 60px rgba(58, 35, 28, 0.35);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalPop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-badge-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--clay-orange-soft);
+  color: var(--clay-orange);
+  display: grid;
+  place-items: center;
+  font-size: 1.4rem;
+  box-shadow: var(--clay-pill-shadow);
+}
+
+.milestone-chip {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--clay-brown);
+  color: #FFFFFF;
+  font-size: 0.66rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  margin-bottom: 2px;
+}
+
+.confirm-trip-strip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  background: #FFFDF9;
+  border: 1px solid var(--clay-border);
+  font-size: 0.88rem;
+  color: var(--clay-brown-deep);
+}
+
+.trip-amount {
+  font-weight: 900;
+  color: var(--clay-orange);
+}
+
+.passengers-review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.review-heading {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--clay-brown);
+  text-transform: uppercase;
+}
+
+.passenger-review-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: #FFFDF9;
+  border: 1px solid var(--clay-border);
+}
+
+.p-seat-pill {
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--clay-orange-soft);
+  color: var(--clay-orange);
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.p-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.p-name {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--clay-brown-deep);
+}
+
+.p-meta {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+.contact-review-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.contact-review-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: #FFFDF9;
+  border: 1px solid var(--clay-border);
+  font-size: 0.84rem;
+}
+
+.c-label {
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-right: 4px;
+}
+
+.c-val {
+  font-weight: 800;
+  color: var(--clay-brown-deep);
+}
+
+.phase-completion-notice {
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: #E5F3E7;
+  border: 1px solid #B4DEBE;
+  color: #1E5C2A;
+}
+
+.phase-completion-notice p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+/* ==========================================================================
+   Responsive Breakpoints
+   ========================================================================== */
+
+@media (max-width: 960px) {
+  .passengers-main-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .passenger-summary-sidebar {
+    position: static;
+  }
+}
+
+@media (max-width: 680px) {
+  .passengers-page-container {
+    padding: 12px 16px 48px;
+  }
+
+  .passenger-inputs-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .contact-inputs-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .contact-review-grid {
+    grid-template-columns: 1fr;
+  }
+}

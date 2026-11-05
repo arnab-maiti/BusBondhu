@@ -1,0 +1,984 @@
+/* ==========================================================================
+   BusBondhu — Dedicated Passenger Bus Tracking UI (Phase 9)
+   Color Palette: Chocolate Brown (#55372D), Cream (#F7EEDF), Burnt Orange (#C96535)
+   Claymorphism Design System
+   ========================================================================== */
+
+.clay-track-page {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 16px 24px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ==========================================================================
+   1. Top Navigation & Breadcrumbs
+   ========================================================================== */
+
+.track-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.clay-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: var(--clay-cream-surface, #FAF4EB);
+  color: var(--clay-brown, #55372D);
+  border: 1.5px solid var(--clay-border, #E8D6C3);
+  border-radius: var(--radius-pill, 9999px);
+  font-size: 0.88rem;
+  font-weight: 750;
+  cursor: pointer;
+  box-shadow: var(--clay-pill-shadow, 0 3px 8px rgba(85, 55, 45, 0.08));
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.clay-back-btn:hover {
+  background: #FFFDF9;
+  color: var(--clay-orange, #C96535);
+  transform: translateX(-2px);
+  border-color: #DCC7B5;
+}
+
+.track-breadcrumb-badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pill-trip-id {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: #FFFDF9;
+  color: var(--clay-brown-deep, #3A231C);
+  border: 1.5px solid var(--clay-border, #E8D6C3);
+  border-radius: var(--radius-pill, 9999px);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+  box-shadow: var(--clay-pill-shadow);
+}
+
+.pill-trip-id .tag-label {
+  color: var(--text-muted, #73554A);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+/* Status Badges */
+.clay-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border-radius: var(--radius-pill, 9999px);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  box-shadow: var(--clay-pill-shadow);
+  border: 1.5px solid transparent;
+}
+
+.clay-status-pill .status-dot {
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.clay-status-pill.status-connected {
+  background: #E5F5E9;
+  color: #175424;
+  border-color: #A3D9B0;
+}
+
+.clay-status-pill.status-waiting {
+  background: #FFF3DD;
+  color: #8C530A;
+  border-color: #F8D69A;
+}
+
+.clay-status-pill.status-unavailable {
+  background: #FDF0ED;
+  color: #8F2D18;
+  border-color: #F1BFB5;
+}
+
+/* ==========================================================================
+   2. Journey Info Card
+   ========================================================================== */
+
+.clay-journey-banner {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  align-items: center;
+  padding: 24px 28px;
+  background: #FFFDF9;
+  border: 1.5px solid var(--clay-border, #E8D6C3);
+  border-radius: var(--radius-lg, 22px);
+  box-shadow: var(--clay-card-shadow);
+}
+
+.journey-main-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.operator-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.operator-bus-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  background: var(--clay-orange-soft, #FCEFE8);
+  border: 2px solid rgba(201, 101, 53, 0.35);
+  border-radius: var(--radius-md, 16px);
+  box-shadow: var(--clay-inset-shadow);
+}
+
+.operator-eyebrow {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--clay-orange, #C96535);
+}
+
+.operator-title {
+  margin: 2px 0 0;
+  font-size: clamp(1.4rem, 2.2vw, 1.85rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--clay-brown-deep, #3A231C);
+}
+
+.bus-type-sub {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--text-muted, #73554A);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.route-endpoints-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto minmax(180px, 1fr);
+  align-items: center;
+  gap: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--clay-border, #E8D6C3);
+}
+
+.endpoint-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.endpoint-block.text-right {
+  text-align: right;
+}
+
+.endpoint-role {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--clay-orange, #C96535);
+}
+
+.endpoint-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--clay-brown-deep, #3A231C);
+}
+
+.endpoint-time {
+  font-size: 0.82rem;
+  color: var(--text-muted, #73554A);
+  font-weight: 600;
+}
+
+.route-arrow-graphic {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0 12px;
+}
+
+.route-travel-date {
+  font-size: 0.76rem;
+  font-weight: 750;
+  color: var(--clay-brown, #55372D);
+  background: var(--clay-beige, #F0E3D1);
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+}
+
+.arrow-line {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 120px;
+  color: var(--clay-orange, #C96535);
+}
+
+.line-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--clay-orange);
+}
+
+.line-bar {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, var(--clay-orange), var(--clay-brown-light));
+}
+
+.line-arrow {
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* Vehicle Switcher Pill */
+.vehicle-selector-card {
+  min-width: 260px;
+  padding: 16px 20px;
+  background: var(--clay-cream-surface, #FAF4EB);
+  border: 1.5px solid var(--clay-border, #E8D6C3);
+  border-radius: var(--radius-md, 16px);
+  box-shadow: var(--clay-inset-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.selector-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--clay-brown, #55372D);
+  text-transform: uppercase;
+}
+
+.clay-select {
+  width: 100%;
+  padding: 10px 14px;
+  background: #FFFDF9;
+  border: 1.5px solid var(--clay-border, #E8D6C3);
+  border-radius: var(--radius-sm, 12px);
+  color: var(--clay-brown-deep, #3A231C);
+  font-size: 0.92rem;
+  font-weight: 700;
+  box-shadow: var(--clay-pill-shadow);
+  cursor: pointer;
+}
+
+.clay-select:focus {
+  outline: 2px solid var(--clay-orange);
+  outline-offset: 1px;
+}
+
+.selector-hint {
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   3. Warning Banner (Stale Signal)
+   ========================================================================== */
+
+.clay-alert-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 20px;
+  border-radius: var(--radius-md, 16px);
+  box-shadow: var(--clay-pill-shadow);
+}
+
+.clay-alert-banner.warning {
+  background: #FFF6E5;
+  border: 1.5px solid #F5D397;
+  color: #7D4C10;
+}
+
+.alert-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.alert-body strong {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.alert-body p {
+  margin: 2px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+/* ==========================================================================
+   4. Main Live Tracking Grid
+   ========================================================================== */
+
+.clay-tracking-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.75fr) minmax(320px, 1fr);
+  gap: 22px;
+  align-items: stretch;
+}
+
+/* Left: Map Container */
+.clay-map-container {
+  display: flex;
+  flex-direction: column;
+  background: #FFFDF9;
+  border: 1.5px solid var(--clay-border, #E8D6C3);
+  border-radius: var(--radius-lg, 22px);
+  overflow: hidden;
+  box-shadow: var(--clay-card-shadow);
+  position: relative;
+}
+
+.map-glass-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  background: rgba(250, 244, 235, 0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 1.5px solid var(--clay-border, #E8D6C3);
+  z-index: 500;
+}
+
+.toolbar-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.signal-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.signal-indicator.pulse-connected {
+  background: #238838;
+  box-shadow: 0 0 0 3px rgba(35, 136, 56, 0.25);
+  animation: signalPulse 2s infinite;
+}
+
+.signal-indicator.pulse-waiting {
+  background: #D98218;
+  box-shadow: 0 0 0 3px rgba(217, 130, 24, 0.25);
+  animation: signalPulse 2s infinite;
+}
+
+.signal-indicator.pulse-unavailable {
+  background: #B93A22;
+}
+
+@keyframes signalPulse {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.status-text-live {
+  font-size: 0.76rem;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  color: var(--clay-brown-deep, #3A231C);
+}
+
+.clay-map-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: #FFFDF9;
+  border: 1.5px solid var(--clay-border, #E8D6C3);
+  border-radius: var(--radius-pill);
+  color: var(--clay-brown, #55372D);
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: var(--clay-pill-shadow);
+  transition: all 0.2s ease;
+}
+
+.clay-map-tool-btn:hover {
+  background: var(--clay-orange-soft);
+  color: var(--clay-orange);
+  border-color: var(--clay-orange);
+  transform: translateY(-1px);
+}
+
+.leaflet-live-map {
+  width: 100%;
+  min-height: 520px;
+  height: 100%;
+  background: #E8DCBE;
+  z-index: 10;
+}
+
+.map-under-note {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px 18px;
+  background: var(--clay-cream-surface, #FAF4EB);
+  border-top: 1px solid var(--clay-border, #E8D6C3);
+  font-size: 0.72rem;
+  color: var(--text-muted, #73554A);
+  font-weight: 600;
+}
+
+/* Claymorphic Bus Pin Marker */
+.clay-bus-pin-wrapper {
+  background: none;
+  border: 0;
+}
+
+.clay-bus-pin {
+  width: 46px;
+  height: 46px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #FFFDF9;
+  border: 3px solid var(--clay-orange, #C96535);
+  box-shadow: 
+    0 10px 22px rgba(85, 55, 45, 0.35),
+    inset 0 2px 4px rgba(255, 255, 255, 0.95),
+    inset 0 -2px 3px rgba(85, 55, 45, 0.15);
+  font-size: 24px;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.clay-bus-pin:hover {
+  transform: scale(1.12);
+}
+
+.pin-pulse {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  border-radius: 50%;
+  border: 2px solid var(--clay-orange);
+  opacity: 0.5;
+  animation: pulsePin 2.2s infinite ease-out;
+  pointer-events: none;
+}
+
+@keyframes pulsePin {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  100% { transform: scale(1.45); opacity: 0; }
+}
+
+/* Popup styling */
+.clay-popup .leaflet-popup-content-wrapper {
+  background: #FFFDF9 !important;
+  color: var(--text-main) !important;
+  border: 2px solid var(--clay-border, #E8D6C3) !important;
+  border-radius: var(--radius-md, 16px) !important;
+  box-shadow: var(--clay-card-shadow) !important;
+  padding: 8px 12px !important;
+}
+
+.clay-popup .popup-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.82rem;
+}
+
+.popup-bus-num {
+  font-size: 0.96rem;
+  color: var(--clay-brown-deep, #3A231C);
+  border-bottom: 1px solid var(--clay-border);
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+}
+
+.popup-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.popup-line .p-label {
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.popup-line .p-val {
+  font-weight: 800;
+  color: var(--clay-brown);
+}
+
+/* ==========================================================================
+   5. Telemetry Details Panel (Right Col)
+   ========================================================================== */
+
+.clay-telemetry-panel {
+  display: flex;
+  flex-direction: column;
+  padding: 28px 24px;
+  background: #FFFDF9;
+  border: 1.5px solid var(--clay-border, #E8D6C3);
+  border-radius: var(--radius-lg, 22px);
+  box-shadow: var(--clay-card-shadow);
+  gap: 20px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 16px;
+  border-bottom: 1.5px solid var(--clay-border, #E8D6C3);
+}
+
+.panel-badge-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  background: var(--clay-cream-surface, #FAF4EB);
+  border: 1.5px solid var(--clay-border, #E8D6C3);
+  border-radius: var(--radius-sm, 12px);
+  box-shadow: var(--clay-inset-shadow);
+}
+
+.eyebrow-mini {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--clay-orange, #C96535);
+}
+
+.panel-title {
+  margin: 2px 0 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--clay-brown-deep, #3A231C);
+  letter-spacing: -0.03em;
+}
+
+.telemetry-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Stat Cards */
+.telemetry-stat-card {
+  padding: 16px 18px;
+  background: var(--clay-cream-surface, #FAF4EB);
+  border: 1.5px solid var(--clay-border, #E8D6C3);
+  border-radius: var(--radius-md, 16px);
+  box-shadow: var(--clay-inset-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.telemetry-stat-card.primary {
+  background: #FFF8F3;
+  border-color: rgba(201, 101, 53, 0.35);
+}
+
+.stat-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted, #73554A);
+}
+
+.stat-value-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--clay-brown-deep, #3A231C);
+  letter-spacing: -0.01em;
+}
+
+.stat-value-large {
+  font-size: 1.7rem;
+  font-weight: 850;
+  color: var(--clay-brown-deep, #3A231C);
+  line-height: 1.1;
+}
+
+.stat-value-large small {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+
+.stat-value-time {
+  font-size: 1.25rem;
+  font-weight: 850;
+  color: var(--clay-brown-deep, #3A231C);
+}
+
+.stat-sub {
+  font-size: 0.72rem;
+  color: var(--text-muted, #73554A);
+  font-weight: 600;
+}
+
+.stat-dual-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Telemetry Details List */
+.telemetry-details-list {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1.5px solid var(--clay-border, #E8D6C3);
+  border-radius: var(--radius-md, 16px);
+  overflow: hidden;
+  background: #FFFDF9;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--clay-border, #E8D6C3);
+  font-size: 0.82rem;
+}
+
+.detail-item:last-child {
+  border-bottom: 0;
+}
+
+.detail-item dt {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.detail-item dd {
+  margin: 0;
+  font-weight: 750;
+  color: var(--clay-brown-deep);
+}
+
+.detail-item dd.bold-text {
+  font-weight: 850;
+  color: var(--clay-brown-deep);
+}
+
+.detail-item dd.status-text-online {
+  color: #175424;
+  font-weight: 800;
+}
+
+/* Advisory Box */
+.passenger-advisory-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--clay-cream-surface, #FAF4EB);
+  border: 1px solid var(--clay-border, #E8D6C3);
+  border-radius: var(--radius-sm, 12px);
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: var(--text-muted, #73554A);
+}
+
+.advisory-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.passenger-advisory-box p {
+  margin: 0;
+}
+
+/* ==========================================================================
+   6. Clear Empty / Waiting State (Requirement 5)
+   ========================================================================== */
+
+.telemetry-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 32px 16px;
+  background: var(--clay-cream-surface, #FAF4EB);
+  border: 2px dashed #DCC7B5;
+  border-radius: var(--radius-lg, 22px);
+  box-shadow: var(--clay-inset-shadow);
+  gap: 14px;
+}
+
+.empty-radar-disc {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #FFFDF9;
+  border: 2px solid var(--clay-border, #E8D6C3);
+  box-shadow: var(--clay-card-shadow);
+}
+
+.radar-icon {
+  font-size: 30px;
+  line-height: 1;
+}
+
+.empty-state-heading {
+  margin: 4px 0 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--clay-brown-deep, #3A231C);
+}
+
+.empty-state-copy {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: var(--text-muted, #73554A);
+  max-width: 320px;
+}
+
+.empty-state-meta-strip {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 14px;
+  background: #FFFDF9;
+  border: 1px solid var(--clay-border, #E8D6C3);
+  border-radius: var(--radius-sm, 12px);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.meta-point {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.point-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--clay-orange);
+}
+
+.meta-point strong {
+  color: var(--clay-brown-deep);
+}
+
+.clay-refresh-btn {
+  margin-top: 6px;
+  padding: 10px 20px;
+  background: var(--clay-orange, #C96535);
+  color: #FFFFFF;
+  border: 1px solid #A84E22;
+  border-radius: var(--radius-pill);
+  font-size: 0.84rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: var(--clay-btn-shadow);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.clay-refresh-btn:hover {
+  background: var(--clay-orange-hover, #B75527);
+  transform: translateY(-1.5px);
+  box-shadow: var(--clay-btn-hover-shadow);
+}
+
+/* ==========================================================================
+   7. Bottom Help / Passenger Safety Strip
+   ========================================================================== */
+
+.track-footer-safety {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 18px 24px;
+  background: #FFFDF9;
+  border: 1.5px solid var(--clay-border, #E8D6C3);
+  border-radius: var(--radius-md, 16px);
+  box-shadow: var(--clay-card-shadow);
+}
+
+.safety-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.safety-icon {
+  font-size: 1.5rem;
+}
+
+.safety-block strong {
+  display: block;
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: var(--clay-brown-deep, #3A231C);
+}
+
+.safety-block p {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  color: var(--text-muted, #73554A);
+}
+
+.clay-home-link-btn {
+  padding: 9px 18px;
+  background: var(--clay-cream-surface, #FAF4EB);
+  border: 1.5px solid var(--clay-border, #E8D6C3);
+  border-radius: var(--radius-pill);
+  color: var(--clay-brown, #55372D);
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: var(--clay-pill-shadow);
+  transition: all 0.2s ease;
+}
+
+.clay-home-link-btn:hover {
+  background: var(--clay-orange-soft);
+  color: var(--clay-orange);
+  border-color: var(--clay-orange);
+}
+
+/* ==========================================================================
+   8. Responsive Breakpoints
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+  .clay-tracking-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .clay-journey-banner {
+    grid-template-columns: 1fr;
+  }
+
+  .vehicle-selector-card {
+    min-width: 100%;
+  }
+
+  .leaflet-live-map {
+    min-height: 440px;
+  }
+}
+
+@media (max-width: 768px) {
+  .clay-track-page {
+    padding: 12px 14px 40px;
+    gap: 16px;
+  }
+
+  .clay-journey-banner {
+    padding: 20px 16px;
+  }
+
+  .route-endpoints-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    text-align: left;
+  }
+
+  .endpoint-block.text-right {
+    text-align: left;
+  }
+
+  .route-arrow-graphic {
+    padding: 6px 0;
+    align-items: flex-start;
+  }
+
+  .arrow-line {
+    width: 100%;
+  }
+
+  .leaflet-live-map {
+    min-height: 360px;
+  }
+
+  .clay-telemetry-panel {
+    padding: 20px 16px;
+  }
+
+  .stat-dual-row {
+    grid-template-columns: 1fr;
+  }
+
+  .track-footer-safety {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .safety-block {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .clay-home-link-btn {
+    width: 100%;
+    text-align: center;
+  }
+}

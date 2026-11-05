@@ -1,0 +1,4983 @@
+﻿
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\BusMap.jsx ==========
+
+import { useEffect, useState } from "react";
+import "./BusMap.css";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMap,
+} from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+
+const busIcon = L.divIcon({
+  className: "bus-marker-wrapper",
+  html: `<div class="bus-marker">ðŸšŒ</div>`,
+  iconSize: [38, 38],
+  iconAnchor: [19, 19],
+});
+
+const initialBuses = [
+  {
+    id: "BUS-001",
+    operator: "SBSTC",
+    route: "Kolkata â†’ Durgapur",
+    lat: 22.5726,
+    lng: 88.3639,
+    speed: 42,
+  },
+  {
+    id: "BUS-002",
+    operator: "WBTC",
+    route: "Howrah â†’ Esplanade",
+    lat: 22.5958,
+    lng: 88.2636,
+    speed: 28,
+  },
+  {
+    id: "BUS-003",
+    operator: "SBSTC",
+    route: "Digha â†’ Kolkata",
+    lat: 21.627,
+    lng: 87.508,
+    speed: 55,
+  },
+];
+
+function MapFocus({ bus }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (bus) {
+      map.flyTo([bus.lat, bus.lng], 10, {
+        duration: 1,
+      });
+    }
+  }, [bus, map]);
+
+  return null;
+}
+
+export default function BusMap({
+  selectedBus,
+  onSelectBus,
+}) {
+  const [buses, setBuses] = useState(initialBuses);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setBuses((current) =>
+        current.map((bus) => ({
+          ...bus,
+          lat: bus.lat + (Math.random() - 0.5) * 0.001,
+          lng: bus.lng + (Math.random() - 0.5) * 0.001,
+        }))
+      );
+    }, 3000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const selected = buses.find(
+    (bus) => bus.id === selectedBus
+  );
+
+  return (
+    <MapContainer
+      center={[22.8, 88.0]}
+      zoom={8}
+      scrollWheelZoom
+      className="real-map"
+    >
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+
+      {buses.map((bus) => (
+        <Marker
+          key={bus.id}
+          position={[bus.lat, bus.lng]}
+          icon={busIcon}
+          eventHandlers={{
+            click: () => onSelectBus(bus.id),
+          }}
+        >
+          <Popup>
+            <strong>{bus.operator}</strong>
+            <br />
+            {bus.route}
+            <br />
+            Speed: {bus.speed} km/h
+            <br />
+            <span>Simulated location</span>
+          </Popup>
+        </Marker>
+      ))}
+
+      <MapFocus bus={selected} />
+    </MapContainer>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Auth\LoginPage.jsx ==========
+
+import { useState } from "react";
+import "./Auth.css";
+
+export default function LoginPage({ onNavigate }) {
+  const [formData, setFormData] = useState({
+    identifier: "",
+    password: "",
+  });
+
+  const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [demoNotice, setDemoNotice] = useState(null);
+
+  const validate = () => {
+    const newErrors = {};
+    const id = formData.identifier.trim();
+
+    if (!id) {
+      newErrors.identifier = "Please enter your email or 10-digit mobile number.";
+    } else {
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(id);
+      const isPhone = /^\d{10}$/.test(id.replace(/[\s-]/g, ""));
+      if (!isEmail && !isPhone) {
+        newErrors.identifier = "Enter a valid email address or 10-digit mobile number.";
+      }
+    }
+
+    if (!formData.password) {
+      newErrors.password = "Password is required.";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => {
+        const updated = { ...prev };
+        delete updated[field];
+        return updated;
+      });
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    setIsLoading(true);
+    setDemoNotice(null);
+
+    // Simulate network submission without faking a login or storing credentials
+    setTimeout(() => {
+      setIsLoading(false);
+      setDemoNotice({
+        identifier: formData.identifier,
+        timestamp: new Date().toLocaleTimeString(),
+      });
+    }, 600);
+  };
+
+  return (
+    <main className="auth-page-container">
+      {/* Top back navigation */}
+      <div className="auth-top-nav">
+        <button
+          type="button"
+          className="auth-back-btn"
+          onClick={() => onNavigate("dashboard")}
+          aria-label="Back to home dashboard"
+        >
+          <span aria-hidden="true">â†</span>
+          <span>Back to Home</span>
+        </button>
+
+        <span className="auth-pill-badge">PHASE 7 PROTOTYPE</span>
+      </div>
+
+      <div className="auth-card-wrapper">
+        <div className="auth-card">
+          {/* Card Header & Brand */}
+          <header className="auth-header">
+            <div className="auth-brand-badge" aria-hidden="true">
+              <span>B</span>
+            </div>
+            <h1>Passenger Sign In</h1>
+            <p className="auth-subtitle">
+              Sign in to manage your Bengal transit bookings, e-tickets, and live alerts.
+            </p>
+          </header>
+
+          {/* Demo Submission Response (Requirement 5 & 6) */}
+          {demoNotice && (
+            <div className="auth-demo-alert" role="status">
+              <div className="demo-alert-header">
+                <span className="demo-alert-icon" aria-hidden="true">ðŸ”’</span>
+                <strong>DEMO PROTOTYPE â€” NO REAL AUTH</strong>
+              </div>
+              <p className="demo-alert-body">
+                Authentication APIs are not integrated in this phase. 
+                Submitted for <strong>{demoNotice.identifier}</strong> at {demoNotice.timestamp}. 
+                <strong>No credentials were sent or stored</strong> in any database, and no session was faked.
+              </p>
+              <div className="demo-alert-actions">
+                <button
+                  type="button"
+                  className="demo-btn-secondary"
+                  onClick={() => setDemoNotice(null)}
+                >
+                  Dismiss
+                </button>
+                <button
+                  type="button"
+                  className="demo-btn-primary"
+                  onClick={() => onNavigate("search")}
+                >
+                  Explore Buses â†’
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Login Form */}
+          <form className="auth-form" onSubmit={handleSubmit} noValidate>
+            {/* Email or Phone */}
+            <div className="auth-field">
+              <label htmlFor="login-identifier" className="auth-label">
+                Email or Mobile Number
+              </label>
+              <div className={`clay-auth-input-box ${errors.identifier ? "has-error" : ""}`}>
+                <span className="input-affix-icon" aria-hidden="true">ðŸ‘¤</span>
+                <input
+                  id="login-identifier"
+                  type="text"
+                  placeholder="e.g. rahul@example.com or 9876543210"
+                  value={formData.identifier}
+                  onChange={(e) => handleChange("identifier", e.target.value)}
+                  autoComplete="username"
+                  aria-invalid={Boolean(errors.identifier)}
+                  aria-describedby={errors.identifier ? "identifier-error" : undefined}
+                />
+              </div>
+              {errors.identifier && (
+                <span id="identifier-error" className="auth-error-hint" role="alert">
+                  {errors.identifier}
+                </span>
+              )}
+            </div>
+
+            {/* Password */}
+            <div className="auth-field">
+              <div className="label-with-aside">
+                <label htmlFor="login-password" className="auth-label">
+                  Password
+                </label>
+                <span className="forgot-disabled-hint" title="Disabled in demo prototype">
+                  Forgot password?
+                </span>
+              </div>
+              <div className={`clay-auth-input-box ${errors.password ? "has-error" : ""}`}>
+                <span className="input-affix-icon" aria-hidden="true">ðŸ”‘</span>
+                <input
+                  id="login-password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  value={formData.password}
+                  onChange={(e) => handleChange("password", e.target.value)}
+                  autoComplete="current-password"
+                  aria-invalid={Boolean(errors.password)}
+                  aria-describedby={errors.password ? "password-error" : undefined}
+                />
+                <button
+                  type="button"
+                  className="password-toggle-btn"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  <span aria-hidden="true">{showPassword ? "ðŸ‘ï¸" : "ðŸ‘ï¸â€ðŸ—¨ï¸"}</span>
+                  <span className="toggle-text">{showPassword ? "Hide" : "Show"}</span>
+                </button>
+              </div>
+              {errors.password && (
+                <span id="password-error" className="auth-error-hint" role="alert">
+                  {errors.password}
+                </span>
+              )}
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="auth-submit-btn"
+              disabled={isLoading}
+              aria-busy={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <span className="auth-spinner" aria-hidden="true" />
+                  <span>Checking...</span>
+                </>
+              ) : (
+                <span>Sign In to BusBondhu â†’</span>
+              )}
+            </button>
+          </form>
+
+          {/* Navigation to Register */}
+          <footer className="auth-card-footer">
+            <p>
+              Don't have an account yet?{" "}
+              <button
+                type="button"
+                className="auth-switch-link"
+                onClick={() => onNavigate("register")}
+              >
+                Register now
+              </button>
+            </p>
+          </footer>
+        </div>
+
+        {/* Safety & Demo Guidelines Note */}
+        <div className="auth-footer-disclaimer">
+          <span className="disclaimer-shield" aria-hidden="true">ðŸ›¡ï¸</span>
+          <p>
+            <strong>Frontend Simulation:</strong> Authentication is not connected to a live identity provider. 
+            Do not enter real or sensitive passwords.
+          </p>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Auth\RegisterPage.jsx ==========
+
+import { useState } from "react";
+import "./Auth.css";
+
+export default function RegisterPage({ onNavigate }) {
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+    agreeTerms: false,
+  });
+
+  const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [demoNotice, setDemoNotice] = useState(null);
+
+  const validate = () => {
+    const newErrors = {};
+
+    if (!formData.fullName.trim() || formData.fullName.trim().length < 2) {
+      newErrors.fullName = "Full name is required (at least 2 characters).";
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Email address is required.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      newErrors.email = "Please enter a valid email address.";
+    }
+
+    const cleanPhone = formData.phone.replace(/[\s-]/g, "");
+    if (!cleanPhone) {
+      newErrors.phone = "10-digit mobile number is required.";
+    } else if (!/^\d{10}$/.test(cleanPhone)) {
+      newErrors.phone = "Enter a valid 10-digit Indian mobile number.";
+    }
+
+    if (!formData.password) {
+      newErrors.password = "Password is required.";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters.";
+    }
+
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = "Confirm password is required.";
+    } else if (formData.confirmPassword !== formData.password) {
+      newErrors.confirmPassword = "Passwords do not match.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => {
+        const updated = { ...prev };
+        delete updated[field];
+        return updated;
+      });
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    setIsLoading(true);
+    setDemoNotice(null);
+
+    // Simulate submission without storing plaintext passwords or creating fake session
+    setTimeout(() => {
+      setIsLoading(false);
+      setDemoNotice({
+        name: formData.fullName.trim(),
+        email: formData.email.trim(),
+        timestamp: new Date().toLocaleTimeString(),
+      });
+    }, 600);
+  };
+
+  return (
+    <main className="auth-page-container">
+      {/* Top back navigation */}
+      <div className="auth-top-nav">
+        <button
+          type="button"
+          className="auth-back-btn"
+          onClick={() => onNavigate("dashboard")}
+          aria-label="Back to home dashboard"
+        >
+          <span aria-hidden="true">â†</span>
+          <span>Back to Home</span>
+        </button>
+
+        <span className="auth-pill-badge">PHASE 7 PROTOTYPE</span>
+      </div>
+
+      <div className="auth-card-wrapper register-variant">
+        <div className="auth-card">
+          {/* Card Header & Brand */}
+          <header className="auth-header">
+            <div className="auth-brand-badge" aria-hidden="true">
+              <span>B</span>
+            </div>
+            <h1>Create Passenger Account</h1>
+            <p className="auth-subtitle">
+              Join Bengal's friendly bus transit network for quick bookings and alerts.
+            </p>
+          </header>
+
+          {/* Demo Submission Response (Requirement 5 & 6) */}
+          {demoNotice && (
+            <div className="auth-demo-alert" role="status">
+              <div className="demo-alert-header">
+                <span className="demo-alert-icon" aria-hidden="true">ðŸ“</span>
+                <strong>DEMO REGISTRATION RECORDED</strong>
+              </div>
+              <p className="demo-alert-body">
+                Registration prototype completed for <strong>{demoNotice.name}</strong> ({demoNotice.email}) at {demoNotice.timestamp}. 
+                <strong>No database record was created</strong> and no credentials were saved.
+              </p>
+              <div className="demo-alert-actions">
+                <button
+                  type="button"
+                  className="demo-btn-secondary"
+                  onClick={() => onNavigate("login")}
+                >
+                  Proceed to Sign In
+                </button>
+                <button
+                  type="button"
+                  className="demo-btn-primary"
+                  onClick={() => onNavigate("search")}
+                >
+                  Find Bus Routes â†’
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Registration Form */}
+          <form className="auth-form" onSubmit={handleSubmit} noValidate>
+            {/* Full Name */}
+            <div className="auth-field">
+              <label htmlFor="reg-name" className="auth-label">
+                Full Name
+              </label>
+              <div className={`clay-auth-input-box ${errors.fullName ? "has-error" : ""}`}>
+                <span className="input-affix-icon" aria-hidden="true">ðŸ·ï¸</span>
+                <input
+                  id="reg-name"
+                  type="text"
+                  placeholder="e.g. Sourav Ganguly"
+                  value={formData.fullName}
+                  onChange={(e) => handleChange("fullName", e.target.value)}
+                  autoComplete="name"
+                  aria-invalid={Boolean(errors.fullName)}
+                  aria-describedby={errors.fullName ? "name-error" : undefined}
+                />
+              </div>
+              {errors.fullName && (
+                <span id="name-error" className="auth-error-hint" role="alert">
+                  {errors.fullName}
+                </span>
+              )}
+            </div>
+
+            {/* Email Address */}
+            <div className="auth-field">
+              <label htmlFor="reg-email" className="auth-label">
+                Email Address
+              </label>
+              <div className={`clay-auth-input-box ${errors.email ? "has-error" : ""}`}>
+                <span className="input-affix-icon" aria-hidden="true">âœ‰ï¸</span>
+                <input
+                  id="reg-email"
+                  type="email"
+                  placeholder="e.g. sourav@example.com"
+                  value={formData.email}
+                  onChange={(e) => handleChange("email", e.target.value)}
+                  autoComplete="email"
+                  aria-invalid={Boolean(errors.email)}
+                  aria-describedby={errors.email ? "email-error" : undefined}
+                />
+              </div>
+              {errors.email && (
+                <span id="email-error" className="auth-error-hint" role="alert">
+                  {errors.email}
+                </span>
+              )}
+            </div>
+
+            {/* Mobile Number */}
+            <div className="auth-field">
+              <label htmlFor="reg-phone" className="auth-label">
+                Mobile Number (+91)
+              </label>
+              <div className={`clay-auth-input-box ${errors.phone ? "has-error" : ""}`}>
+                <span className="input-affix-icon" aria-hidden="true">ðŸ“±</span>
+                <span className="input-prefix-label">+91</span>
+                <input
+                  id="reg-phone"
+                  type="tel"
+                  placeholder="9876543210"
+                  value={formData.phone}
+                  onChange={(e) => handleChange("phone", e.target.value)}
+                  autoComplete="tel-national"
+                  maxLength={10}
+                  aria-invalid={Boolean(errors.phone)}
+                  aria-describedby={errors.phone ? "phone-error" : undefined}
+                />
+              </div>
+              {errors.phone && (
+                <span id="phone-error" className="auth-error-hint" role="alert">
+                  {errors.phone}
+                </span>
+              )}
+            </div>
+
+            {/* Password */}
+            <div className="auth-field">
+              <label htmlFor="reg-password" className="auth-label">
+                Create Password
+              </label>
+              <div className={`clay-auth-input-box ${errors.password ? "has-error" : ""}`}>
+                <span className="input-affix-icon" aria-hidden="true">ðŸ”‘</span>
+                <input
+                  id="reg-password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Minimum 6 characters"
+                  value={formData.password}
+                  onChange={(e) => handleChange("password", e.target.value)}
+                  autoComplete="new-password"
+                  aria-invalid={Boolean(errors.password)}
+                  aria-describedby={errors.password ? "reg-password-error" : undefined}
+                />
+                <button
+                  type="button"
+                  className="password-toggle-btn"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  <span aria-hidden="true">{showPassword ? "ðŸ‘ï¸" : "ðŸ‘ï¸â€ðŸ—¨ï¸"}</span>
+                  <span className="toggle-text">{showPassword ? "Hide" : "Show"}</span>
+                </button>
+              </div>
+              {errors.password && (
+                <span id="reg-password-error" className="auth-error-hint" role="alert">
+                  {errors.password}
+                </span>
+              )}
+            </div>
+
+            {/* Confirm Password */}
+            <div className="auth-field">
+              <label htmlFor="reg-confirm-password" className="auth-label">
+                Confirm Password
+              </label>
+              <div className={`clay-auth-input-box ${errors.confirmPassword ? "has-error" : ""}`}>
+                <span className="input-affix-icon" aria-hidden="true">ðŸ”’</span>
+                <input
+                  id="reg-confirm-password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Re-enter your password"
+                  value={formData.confirmPassword}
+                  onChange={(e) => handleChange("confirmPassword", e.target.value)}
+                  autoComplete="new-password"
+                  aria-invalid={Boolean(errors.confirmPassword)}
+                  aria-describedby={errors.confirmPassword ? "confirm-error" : undefined}
+                />
+                <button
+                  type="button"
+                  className="password-toggle-btn"
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                >
+                  <span aria-hidden="true">{showConfirmPassword ? "ðŸ‘ï¸" : "ðŸ‘ï¸â€ðŸ—¨ï¸"}</span>
+                  <span className="toggle-text">{showConfirmPassword ? "Hide" : "Show"}</span>
+                </button>
+              </div>
+              {errors.confirmPassword && (
+                <span id="confirm-error" className="auth-error-hint" role="alert">
+                  {errors.confirmPassword}
+                </span>
+              )}
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="auth-submit-btn"
+              disabled={isLoading}
+              aria-busy={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <span className="auth-spinner" aria-hidden="true" />
+                  <span>Registering...</span>
+                </>
+              ) : (
+                <span>Create BusBondhu Account â†’</span>
+              )}
+            </button>
+          </form>
+
+          {/* Navigation to Login */}
+          <footer className="auth-card-footer">
+            <p>
+              Already have an account?{" "}
+              <button
+                type="button"
+                className="auth-switch-link"
+                onClick={() => onNavigate("login")}
+              >
+                Sign In
+              </button>
+            </p>
+          </footer>
+        </div>
+
+        {/* Safety & Demo Guidelines Note */}
+        <div className="auth-footer-disclaimer">
+          <span className="disclaimer-shield" aria-hidden="true">ðŸ›¡ï¸</span>
+          <p>
+            <strong>Frontend Simulation:</strong> Accounts are not saved to a real database. 
+            Do not enter sensitive passwords.
+          </p>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Bookings\BookingCard.jsx ==========
+
+export default function BookingCard({ booking, onNavigate }) {
+  const {
+    id = "BB-BK-000000",
+    operatorName = "SBSTC Express",
+    busType = "Volvo AC Seater (2+2)",
+    origin = "Kolkata",
+    destination = "Durgapur",
+    departureTime = "07:30 AM",
+    arrivalTime = "10:45 AM",
+    duration = "3h 15m",
+    travelDate = "Today",
+    seats = ["1A"],
+    passengers = [],
+    totalAmount = 504,
+    paymentMethod = "UPI",
+    status = "upcoming",
+    statusLabel = "Upcoming â€¢ Confirmed",
+    isSessionBooking = false,
+  } = booking;
+
+  const handleViewTicket = () => {
+    if (onNavigate) {
+      onNavigate("confirmation", {
+        ...booking,
+        bookingId: id,
+      });
+    }
+  };
+
+  const handleTrackBus = () => {
+    if (onNavigate) {
+      onNavigate("tracking");
+    }
+  };
+
+  const handleBookAgain = () => {
+    if (onNavigate) {
+      onNavigate("search", {
+        from: origin.split(" ")[0],
+        to: destination.split(" ")[0],
+      });
+    }
+  };
+
+  return (
+    <article className={`booking-clay-card status-${status}`} aria-labelledby={`booking-title-${id}`}>
+      {/* Top Header Row: Operator, Reference & Status Badge */}
+      <div className="card-top-row">
+        <div className="operator-block">
+          <span className="operator-icon" aria-hidden="true">ðŸšŒ</span>
+          <div>
+            <h3 id={`booking-title-${id}`} className="operator-name">
+              {operatorName}
+            </h3>
+            <span className="bus-category-sub">{busType}</span>
+          </div>
+        </div>
+
+        <div className="status-badge-wrap">
+          {isSessionBooking && (
+            <span className="session-pill-tag">Just Booked</span>
+          )}
+          <span className={`status-pill pill-${status}`}>
+            <span className="status-dot" aria-hidden="true">â—</span>
+            {statusLabel}
+          </span>
+        </div>
+      </div>
+
+      {/* Booking Reference Strip */}
+      <div className="booking-ref-strip">
+        <span className="ref-item">
+          <span className="ref-label">Booking ID:</span>
+          <span className="ref-value code-font">{id}</span>
+        </span>
+        <span className="ref-divider" aria-hidden="true">â€¢</span>
+        <span className="ref-item">
+          <span className="ref-label">Date:</span>
+          <span className="ref-value bold">{travelDate}</span>
+        </span>
+      </div>
+
+      {/* Journey Timeline */}
+      <div className="card-journey-row">
+        <div className="journey-stop origin">
+          <span className="time-text">{departureTime}</span>
+          <span className="city-text">{origin}</span>
+          <span className="point-sub">Boarding Point</span>
+        </div>
+
+        <div className="journey-path-graphic" aria-hidden="true">
+          <span className="duration-tag">{duration}</span>
+          <div className="path-bar">
+            <span className="bar-circle start" />
+            <span className="bar-line" />
+            <span className="bar-arrow">â†’</span>
+            <span className="bar-line" />
+            <span className="bar-circle end" />
+          </div>
+        </div>
+
+        <div className="journey-stop destination">
+          <span className="time-text">{arrivalTime}</span>
+          <span className="city-text">{destination}</span>
+          <span className="point-sub">Destination</span>
+        </div>
+      </div>
+
+      {/* Meta Grid: Seats, Passengers, Payment */}
+      <div className="card-meta-grid">
+        <div className="meta-box">
+          <span className="box-label">Reserved Seats</span>
+          <div className="seats-tag-group">
+            {seats.map((seat) => (
+              <span key={seat} className="seat-clay-tag">
+                {seat}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="meta-box">
+          <span className="box-label">Passenger(s)</span>
+          <span className="box-val bold">
+            {passengers && passengers.length > 0
+              ? `${passengers[0].fullName}${passengers.length > 1 ? ` +${passengers.length - 1} more` : ""}`
+              : `${seats.length} Passenger${seats.length > 1 ? "s" : ""}`}
+          </span>
+        </div>
+
+        <div className="meta-box">
+          <span className="box-label">Total Fare Paid</span>
+          <span className="box-val fare-price">â‚¹{totalAmount}</span>
+          <span className="pay-mode-sub">{paymentMethod}</span>
+        </div>
+      </div>
+
+      {/* Action Footer */}
+      <footer className="card-actions-footer">
+        <div className="actions-left">
+          {status === "upcoming" && (
+            <button
+              type="button"
+              className="action-btn track-btn"
+              onClick={handleTrackBus}
+              aria-label={`Track bus for journey to ${destination}`}
+            >
+              <span aria-hidden="true">ðŸ“</span>
+              <span>Track Bus</span>
+            </button>
+          )}
+
+          {status === "completed" && (
+            <button
+              type="button"
+              className="action-btn rebook-btn"
+              onClick={handleBookAgain}
+              aria-label={`Book again from ${origin} to ${destination}`}
+            >
+              <span aria-hidden="true">ðŸ”„</span>
+              <span>Book Again</span>
+            </button>
+          )}
+
+          {status === "cancelled" && (
+            <span className="refund-status-note">
+              âœ“ Full refund processed to original payment method
+            </span>
+          )}
+        </div>
+
+        <div className="actions-right">
+          <button
+            type="button"
+            className="action-btn ticket-btn"
+            onClick={handleViewTicket}
+            aria-label={`View e-ticket for booking ${id}`}
+          >
+            <span aria-hidden="true">ðŸŽŸï¸</span>
+            <span>{status === "upcoming" ? "View E-Ticket" : "View Ticket Slip"}</span>
+            <span aria-hidden="true">â†’</span>
+          </button>
+        </div>
+      </footer>
+    </article>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Bookings\MyBookingsPage.jsx ==========
+
+import { useState, useMemo } from "react";
+import BookingCard from "./BookingCard";
+import "./Bookings.css";
+
+// Development Sample Fixtures (Requirement 5)
+const SAMPLE_BOOKINGS_FIXTURE = [
+  {
+    id: "BB-BK-739201",
+    operatorName: "SBSTC Express",
+    busType: "Volvo AC Seater (2+2)",
+    origin: "Kolkata (Esplanade)",
+    destination: "Durgapur (City Centre)",
+    departureTime: "07:30 AM",
+    arrivalTime: "10:45 AM",
+    duration: "3h 15m",
+    travelDate: "Tomorrow, Oct 29, 2026",
+    seats: ["1A", "1B"],
+    passengerCount: 2,
+    passengers: [
+      { fullName: "Arnab Mukherjee", seatId: "1A", age: 29, gender: "male" },
+      { fullName: "Priyanka Sen", seatId: "1B", age: 27, gender: "female" },
+    ],
+    contact: { email: "passenger@example.com", phone: "9876543210" },
+    baseFare: 960,
+    taxesAndFees: 48,
+    totalAmount: 1008,
+    status: "upcoming",
+    statusLabel: "Upcoming â€¢ Scheduled",
+    paymentMethod: "UPI (Google Pay)",
+    isSampleFixture: true,
+  },
+  {
+    id: "BB-BK-618492",
+    operatorName: "NBSTC Royal Service",
+    busType: "AC Sleeper (2+1)",
+    origin: "Kolkata (Karunamoyee)",
+    destination: "Siliguri (Tenzing Norgay Central)",
+    departureTime: "08:00 PM",
+    arrivalTime: "07:30 AM",
+    duration: "11h 30m",
+    travelDate: "Nov 02, 2026",
+    seats: ["4A"],
+    passengerCount: 1,
+    passengers: [
+      { fullName: "Arnab Mukherjee", seatId: "4A", age: 29, gender: "male" },
+    ],
+    contact: { email: "passenger@example.com", phone: "9876543210" },
+    baseFare: 850,
+    taxesAndFees: 43,
+    totalAmount: 893,
+    status: "upcoming",
+    statusLabel: "Upcoming â€¢ Confirmed",
+    paymentMethod: "Credit Card (HDFC)",
+    isSampleFixture: true,
+  },
+  {
+    id: "BB-BK-501239",
+    operatorName: "WBTC Green Line",
+    busType: "Electric AC Seater",
+    origin: "Kolkata (Howrah Station)",
+    destination: "Asansol (Bus Terminus)",
+    departureTime: "06:15 AM",
+    arrivalTime: "10:30 AM",
+    duration: "4h 15m",
+    travelDate: "Oct 20, 2026",
+    seats: ["2B"],
+    passengerCount: 1,
+    passengers: [
+      { fullName: "Arnab Mukherjee", seatId: "2B", age: 29, gender: "male" },
+    ],
+    contact: { email: "passenger@example.com", phone: "9876543210" },
+    baseFare: 420,
+    taxesAndFees: 21,
+    totalAmount: 441,
+    status: "completed",
+    statusLabel: "Completed",
+    paymentMethod: "UPI (PhonePe)",
+    isSampleFixture: true,
+  },
+  {
+    id: "BB-BK-420917",
+    operatorName: "South Bengal Royal Express",
+    busType: "Express Non-AC (3+2)",
+    origin: "Durgapur (City Centre)",
+    destination: "Kolkata (Esplanade)",
+    departureTime: "04:30 PM",
+    arrivalTime: "07:45 PM",
+    duration: "3h 15m",
+    travelDate: "Oct 12, 2026",
+    seats: ["3C", "3D"],
+    passengerCount: 2,
+    passengers: [
+      { fullName: "Arnab Mukherjee", seatId: "3C", age: 29, gender: "male" },
+      { fullName: "Debanjan Das", seatId: "3D", age: 31, gender: "male" },
+    ],
+    contact: { email: "passenger@example.com", phone: "9876543210" },
+    baseFare: 760,
+    taxesAndFees: 38,
+    totalAmount: 798,
+    status: "cancelled",
+    statusLabel: "Cancelled â€¢ Refund Processed",
+    paymentMethod: "Net Banking (SBI)",
+    isSampleFixture: true,
+  },
+];
+
+export default function MyBookingsPage({ onNavigate }) {
+  const [activeFilter, setActiveFilter] = useState("all");
+
+  // Load session booking if one was created in this browser session
+  const allBookings = useMemo(() => {
+    let list = [...SAMPLE_BOOKINGS_FIXTURE];
+    try {
+      const saved = sessionStorage.getItem("bb_booking_data");
+      if (saved) {
+        const sessionBooking = JSON.parse(saved);
+        if (sessionBooking && sessionBooking.seats && sessionBooking.seats.length > 0) {
+          // Prepend as an active session booking card
+          const currentSessionBooking = {
+            id: sessionBooking.bookingId || "BB-BK-RECENT",
+            operatorName: sessionBooking.operatorName || "SBSTC Express",
+            busType: sessionBooking.busType || "Volvo AC Seater (2+2)",
+            origin: sessionBooking.origin || "Kolkata",
+            destination: sessionBooking.destination || "Durgapur",
+            departureTime: sessionBooking.departureTime || "07:30 AM",
+            arrivalTime: sessionBooking.arrivalTime || "10:45 AM",
+            duration: sessionBooking.duration || "3h 15m",
+            travelDate: sessionBooking.date || "Today",
+            seats: sessionBooking.seats || ["1A"],
+            passengerCount: sessionBooking.passengerCount || sessionBooking.seats?.length || 1,
+            passengers: sessionBooking.passengers || [],
+            contact: sessionBooking.contact || {},
+            baseFare: sessionBooking.baseFare || 480,
+            taxesAndFees: sessionBooking.taxesAndFees || 24,
+            totalAmount: sessionBooking.totalAmount || 504,
+            status: "upcoming",
+            statusLabel: "Upcoming â€¢ Just Booked",
+            paymentMethod: sessionBooking.selectedMethod === "upi"
+              ? "UPI (Instant Transfer)"
+              : sessionBooking.selectedMethod === "card"
+                ? "Credit / Debit Card"
+                : "Simulation Payment",
+            isSessionBooking: true,
+            isSampleFixture: false,
+          };
+          list = [currentSessionBooking, ...list];
+        }
+      }
+    } catch {
+      // handled gracefully
+    }
+    return list;
+  }, []);
+
+  // Filter bookings based on active tab
+  const filteredBookings = useMemo(() => {
+    if (activeFilter === "all") return allBookings;
+    if (activeFilter === "upcoming") {
+      return allBookings.filter((b) => b.status === "upcoming");
+    }
+    if (activeFilter === "completed") {
+      return allBookings.filter((b) => b.status === "completed");
+    }
+    if (activeFilter === "cancelled") {
+      return allBookings.filter((b) => b.status === "cancelled");
+    }
+    return allBookings;
+  }, [allBookings, activeFilter]);
+
+  // Counts for tabs
+  const counts = useMemo(() => {
+    return {
+      all: allBookings.length,
+      upcoming: allBookings.filter((b) => b.status === "upcoming").length,
+      completed: allBookings.filter((b) => b.status === "completed").length,
+      cancelled: allBookings.filter((b) => b.status === "cancelled").length,
+    };
+  }, [allBookings]);
+
+  return (
+    <main className="my-bookings-container">
+      {/* Top Header & Breadcrumb */}
+      <div className="bookings-top-bar">
+        <button
+          type="button"
+          className="bookings-back-btn"
+          onClick={() => onNavigate("dashboard")}
+          aria-label="Back to home dashboard"
+        >
+          <span aria-hidden="true">â†</span>
+          <span>Back to Home</span>
+        </button>
+
+        <span className="bookings-pill-tag">PHASE 8 MILESTONE</span>
+      </div>
+
+      <header className="bookings-heading-section">
+        <span className="bookings-eyebrow">PASSENGER JOURNEYS</span>
+        <h1>My Bookings</h1>
+        <p className="bookings-subtext">
+          Review your scheduled trips, download e-tickets, and follow live Bengal transit buses.
+        </p>
+      </header>
+
+      {/* Development Fixture Alert (Requirement 5) */}
+      <section className="fixture-notice-card" role="status" aria-label="Development fixture notice">
+        <span className="notice-icon-circle" aria-hidden="true">â„¹ï¸</span>
+        <div className="notice-text">
+          <div className="notice-badge-row">
+            <span className="notice-pill">DEVELOPMENT FIXTURE DATA</span>
+            <span className="notice-subtag">NO LIVE API CONNECTION</span>
+          </div>
+          <p>
+            Booking retrieval APIs are not connected in this phase. The records below are clearly labelled 
+            <strong> demonstration sample fixtures</strong> for UI evaluation. Never assume these represent confirmed 
+            reservations on the physical transit network.
+          </p>
+        </div>
+      </section>
+
+      {/* Filter Tabs (Requirement 3) */}
+      <nav className="bookings-filter-nav" aria-label="Filter bookings by status">
+        <button
+          type="button"
+          className={`filter-tab ${activeFilter === "all" ? "active" : ""}`}
+          onClick={() => setActiveFilter("all")}
+          aria-selected={activeFilter === "all"}
+          role="tab"
+        >
+          <span>All Journeys</span>
+          <span className="tab-count">{counts.all}</span>
+        </button>
+
+        <button
+          type="button"
+          className={`filter-tab ${activeFilter === "upcoming" ? "active" : ""}`}
+          onClick={() => setActiveFilter("upcoming")}
+          aria-selected={activeFilter === "upcoming"}
+          role="tab"
+        >
+          <span>Upcoming</span>
+          <span className="tab-count count-green">{counts.upcoming}</span>
+        </button>
+
+        <button
+          type="button"
+          className={`filter-tab ${activeFilter === "completed" ? "active" : ""}`}
+          onClick={() => setActiveFilter("completed")}
+          aria-selected={activeFilter === "completed"}
+          role="tab"
+        >
+          <span>Completed</span>
+          <span className="tab-count">{counts.completed}</span>
+        </button>
+
+        <button
+          type="button"
+          className={`filter-tab ${activeFilter === "cancelled" ? "active" : ""}`}
+          onClick={() => setActiveFilter("cancelled")}
+          aria-selected={activeFilter === "cancelled"}
+          role="tab"
+        >
+          <span>Cancelled</span>
+          <span className="tab-count count-orange">{counts.cancelled}</span>
+        </button>
+      </nav>
+
+      {/* Bookings List or Empty State (Requirements 2 & 6) */}
+      {filteredBookings.length > 0 ? (
+        <div className="bookings-cards-stack">
+          {filteredBookings.map((booking) => (
+            <BookingCard
+              key={booking.id}
+              booking={booking}
+              onNavigate={onNavigate}
+            />
+          ))}
+        </div>
+      ) : (
+        /* Friendly Empty State (Requirement 6) */
+        <div className="bookings-empty-card" role="status">
+          <div className="empty-icon-circle" aria-hidden="true">
+            ðŸŽ«
+          </div>
+          <h3>No {activeFilter !== "all" ? activeFilter : ""} bookings found</h3>
+          <p className="empty-desc">
+            {activeFilter === "upcoming"
+              ? "You don't have any upcoming bus journeys scheduled right now."
+              : activeFilter === "completed"
+                ? "No completed journey history found in this sample dataset."
+                : activeFilter === "cancelled"
+                  ? "No cancelled bookings to show."
+                  : "You don't have any bus bookings recorded yet."}
+          </p>
+          <div className="empty-actions">
+            {activeFilter !== "all" && (
+              <button
+                type="button"
+                className="empty-btn-secondary"
+                onClick={() => setActiveFilter("all")}
+              >
+                View All Bookings
+              </button>
+            )}
+            <button
+              type="button"
+              className="empty-btn-primary"
+              onClick={() => onNavigate("search")}
+            >
+              Search Bus Routes â†’
+            </button>
+          </div>
+        </div>
+      )}
+    </main>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Confirmation\ConfirmationPage.jsx ==========
+
+import { useState } from "react";
+import TicketCard from "./TicketCard";
+import "./Confirmation.css";
+
+const FALLBACK_TICKET_DATA = {
+  bookingId: "DEMO-UNCONFIRMED",
+  origin: "Kolkata (Esplanade)",
+  destination: "Durgapur (City Centre)",
+  operatorName: "SBSTC Express (Demo)",
+  busType: "Volvo AC Seater (2+2)",
+  departureTime: "07:30 AM",
+  arrivalTime: "10:45 AM",
+  duration: "3h 15m",
+  date: "Today",
+  seats: ["1A", "1B"],
+  passengerCount: 2,
+  passengers: [
+    { seatId: "1A", fullName: "Demo Traveler 1", age: "28", gender: "male" },
+    { seatId: "1B", fullName: "Demo Traveler 2", age: "25", gender: "female" },
+  ],
+  contact: {
+    email: "passenger@example.com",
+    phone: "9876543210",
+  },
+  farePerSeat: 480,
+  baseFare: 960,
+  taxesAndFees: 48,
+  totalAmount: 1008,
+  paymentMethod: "Demo Simulation",
+  isDirectNavigation: true,
+};
+
+export default function ConfirmationPage({
+  bookingId,
+  bookingData,
+  onNavigate,
+}) {
+  const [printFeedback, setPrintFeedback] = useState("");
+
+  // Determine if this is a direct navigation / missing session data
+  const isDirectNavigation =
+    !bookingData ||
+    !bookingData.seats ||
+    bookingData.seats.length === 0;
+
+  // Active ticket payload
+  const activeTicket = isDirectNavigation
+    ? {
+        ...FALLBACK_TICKET_DATA,
+        bookingId: bookingId || "DEMO-UNCONFIRMED",
+        isDirectNavigation: true,
+      }
+    : {
+        bookingId: bookingId || bookingData.bookingId || "DEMO-CONF-829103",
+        origin: bookingData.origin || "Kolkata",
+        destination: bookingData.destination || "Durgapur",
+        operatorName: bookingData.operatorName || "SBSTC Express",
+        busType: bookingData.busType || "Volvo AC Seater (2+2)",
+        departureTime: bookingData.departureTime || "07:30 AM",
+        arrivalTime: bookingData.arrivalTime || "10:45 AM",
+        duration: bookingData.duration || "3h 15m",
+        date: bookingData.date || "Today",
+        seats: bookingData.seats || ["1A"],
+        passengerCount: bookingData.passengerCount || bookingData.seats?.length || 1,
+        passengers: bookingData.passengers || [],
+        contact: bookingData.contact || {},
+        farePerSeat: bookingData.farePerSeat || 480,
+        baseFare: bookingData.baseFare || 480,
+        taxesAndFees: bookingData.taxesAndFees || 24,
+        totalAmount: bookingData.totalAmount || 504,
+        paymentMethod:
+          bookingData.selectedMethod === "upi"
+            ? `UPI (${bookingData.paymentDetails?.upiApp || "Google Pay"})`
+            : bookingData.selectedMethod === "card"
+              ? "Credit / Debit Card (Demo)"
+              : bookingData.selectedMethod === "netbanking"
+                ? `Net Banking (${bookingData.paymentDetails?.selectedBank || "SBI"})`
+                : "Simulation Payment",
+        isDirectNavigation: false,
+      };
+
+  const handlePrint = () => {
+    setPrintFeedback("Preparing print dialog...");
+    setTimeout(() => {
+      window.print();
+      setPrintFeedback("");
+    }, 200);
+  };
+
+  return (
+    <main className="confirmation-page-container">
+      {/* Top Navigation & Status Breadcrumb */}
+      <div className="confirmation-top-bar no-print">
+        <button
+          type="button"
+          className="back-home-pill-btn"
+          onClick={() => onNavigate("dashboard")}
+          aria-label="Back to home dashboard"
+        >
+          <span aria-hidden="true">ðŸ </span>
+          <span>Back to Home</span>
+        </button>
+
+        <div className="stepper-track-pill" aria-label="Booking flow progress">
+          <span className="step-passed">1. Search âœ“</span>
+          <span className="step-sep">â€º</span>
+          <span className="step-passed">2. Seats âœ“</span>
+          <span className="step-sep">â€º</span>
+          <span className="step-passed">3. Passengers âœ“</span>
+          <span className="step-sep">â€º</span>
+          <span className="step-passed">4. Payment âœ“</span>
+          <span className="step-sep">â€º</span>
+          <span className="step-current">5. E-ticket</span>
+        </div>
+      </div>
+
+      {/* Prominent Truthful Status Banner (Requirements 2 & 7) */}
+      <section
+        className={`status-alert-banner no-print ${
+          isDirectNavigation ? "banner-warning" : "banner-demo"
+        }`}
+        role="status"
+        aria-label="Booking status message"
+      >
+        <div className="banner-icon-circle" aria-hidden="true">
+          {isDirectNavigation ? "âš ï¸" : "ðŸŽ«"}
+        </div>
+        <div className="banner-text-content">
+          <div className="banner-badge-row">
+            <span className="status-chip">
+              {isDirectNavigation
+                ? "DIRECT NAVIGATION / UNVERIFIED RECORD"
+                : "DEMO CONFIRMATION PREVIEW"}
+            </span>
+            <span className="non-prod-tag">PHASE 6 FRONTEND PROTOTYPE</span>
+          </div>
+          <h2 className="banner-heading">
+            {isDirectNavigation
+              ? `Demonstration Preview for Booking #${activeTicket.bookingId}`
+              : "Demo Booking Confirmation & E-ticket"}
+          </h2>
+          <p className="banner-desc">
+            {isDirectNavigation
+              ? "No live checkout session was detected for this URL. To avoid inventing reservations, this page displays demonstration fallback data. No ticket was created on any government or private transit database."
+              : "This e-ticket is a development prototype and demonstration. No actual funds were charged, no seat was permanently reserved on the live transit network, and this pass cannot be used for boarding."}
+          </p>
+        </div>
+      </section>
+
+      {/* Quick Action Toolbar (Print / Home / Search) */}
+      <div className="action-toolbar no-print">
+        <div className="action-buttons-group">
+          <button
+            type="button"
+            className="btn-print"
+            onClick={handlePrint}
+            aria-label="Print or Save as PDF"
+          >
+            <span aria-hidden="true">ðŸ–¨ï¸</span>
+            <span>Print / Save as PDF</span>
+          </button>
+
+          <button
+            type="button"
+            className="btn-new-search"
+            onClick={() => onNavigate("search")}
+            aria-label="Search and book another bus"
+          >
+            <span aria-hidden="true">ðŸ”</span>
+            <span>Book Another Journey</span>
+          </button>
+
+          <button
+            type="button"
+            className="btn-dashboard"
+            onClick={() => onNavigate("dashboard")}
+            aria-label="Go to BusBondhu home dashboard"
+          >
+            <span>Home Dashboard â†’</span>
+          </button>
+        </div>
+
+        {printFeedback && (
+          <span className="print-hint" role="status">
+            {printFeedback}
+          </span>
+        )}
+      </div>
+
+      {/* Center Ticket Card */}
+      <div className="ticket-printable-container">
+        <TicketCard ticketData={activeTicket} />
+      </div>
+
+      {/* Post-Booking Helpful Guidelines */}
+      <section className="post-booking-faq no-print" aria-label="Journey FAQs">
+        <h3 className="faq-title">Need help with your Bengal journey?</h3>
+        <div className="faq-grid">
+          <div className="faq-card">
+            <h4>ðŸ“± SMS & WhatsApp Alerts</h4>
+            <p>
+              In a live service, your conductor contact number and bus tracking link are sent via SMS 30 minutes before boarding.
+            </p>
+          </div>
+          <div className="faq-card">
+            <h4>ðŸ§³ Luggage Policy</h4>
+            <p>
+              Up to 2 pieces of luggage (maximum 20kg per passenger) can be stored in the lower luggage deck at no extra fee.
+            </p>
+          </div>
+          <div className="faq-card">
+            <h4>ðŸ“ Live GPS Tracking</h4>
+            <p>
+              You can monitor real-time bus locations directly in the{" "}
+              <button
+                type="button"
+                className="faq-link-btn"
+                onClick={() => onNavigate("tracking")}
+              >
+                Live Tracking map
+              </button>.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Confirmation\TicketCard.jsx ==========
+
+import { useState } from "react";
+
+export default function TicketCard({ ticketData }) {
+  const {
+    bookingId = "DEMO-TKT-000000",
+    origin = "Kolkata",
+    destination = "Durgapur",
+    operatorName = "SBSTC Express",
+    busType = "Volvo AC Seater (2+2)",
+    departureTime = "07:30 AM",
+    arrivalTime = "10:45 AM",
+    duration = "3h 15m",
+    date = "Today",
+    seats = ["1A"],
+    passengers = [],
+    contact = {},
+    baseFare = 480,
+    taxesAndFees = 24,
+    totalAmount = 504,
+    paymentMethod = "UPI (Demo)",
+    isDirectNavigation = false,
+  } = ticketData || {};
+
+  // Formatted issue date (pure useState initialization)
+  const [issuedTimestamp] = useState(() => {
+    return new Date().toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  });
+
+  return (
+    <article className="eticket-wrapper" aria-label="E-ticket boarding slip">
+      {/* Top Banner Warning */}
+      <div className="ticket-top-badge-strip">
+        <span className="strip-alert-icon" aria-hidden="true">âš ï¸</span>
+        <span className="strip-alert-text">
+          DEMO BOARDING SLIP â€” FOR PROTOTYPE DISPLAY ONLY â€¢ NOT A VALID TRANSIT PASS
+        </span>
+      </div>
+
+      <div className="eticket-card">
+        {/* ===================================================================
+            Ticket Header
+            =================================================================== */}
+        <header className="ticket-header">
+          <div className="ticket-brand">
+            <span className="ticket-brand-mark">B</span>
+            <div className="ticket-brand-text">
+              <span className="ticket-brand-title">BusBondhu</span>
+              <span className="ticket-brand-sub">Bengal Transit e-Ticket</span>
+            </div>
+          </div>
+
+          <div className="ticket-ref-block">
+            <span className="ticket-ref-label">Booking Reference</span>
+            <span className="ticket-ref-id code-font">{bookingId}</span>
+            <span className="ticket-issue-date">Issued: {issuedTimestamp}</span>
+          </div>
+        </header>
+
+        {/* ===================================================================
+            Journey Route & Timing Block
+            =================================================================== */}
+        <div className="ticket-journey-strip">
+          <div className="journey-endpoint origin">
+            <span className="station-city">{origin}</span>
+            <span className="station-time">{departureTime}</span>
+            <span className="station-label">Boarding Stop</span>
+          </div>
+
+          <div className="journey-duration-wrap">
+            <span className="duration-pill">{duration}</span>
+            <div className="duration-line" aria-hidden="true">
+              <span className="line-dot" />
+              <span className="line-bar" />
+              <span className="line-bus">ðŸšŒ</span>
+              <span className="line-bar" />
+              <span className="line-dot" />
+            </div>
+            <span className="travel-date">{date}</span>
+          </div>
+
+          <div className="journey-endpoint destination">
+            <span className="station-city">{destination}</span>
+            <span className="station-time">{arrivalTime}</span>
+            <span className="station-label">Destination Stop</span>
+          </div>
+        </div>
+
+        {/* Bus Service Meta Details */}
+        <div className="ticket-bus-details">
+          <div className="bus-detail-item">
+            <span className="detail-label">Service Operator</span>
+            <span className="detail-value bold">{operatorName}</span>
+          </div>
+          <div className="bus-detail-item">
+            <span className="detail-label">Bus Category</span>
+            <span className="detail-value">{busType}</span>
+          </div>
+          <div className="bus-detail-item">
+            <span className="detail-label">Seats Reserved</span>
+            <span className="detail-value seats-highlight">{seats.join(", ")}</span>
+          </div>
+          <div className="bus-detail-item">
+            <span className="detail-label">Boarding Bay</span>
+            <span className="detail-value">Bay 4 â€¢ Platform A</span>
+          </div>
+        </div>
+
+        {/* ===================================================================
+            Perforated Ticket Divider
+            =================================================================== */}
+        <div className="ticket-tear-line" aria-hidden="true">
+          <span className="tear-notch notch-left" />
+          <div className="tear-dashed-line" />
+          <span className="tear-notch notch-right" />
+        </div>
+
+        {/* ===================================================================
+            Passenger List & Contact Section
+            =================================================================== */}
+        <div className="ticket-middle-section">
+          <div className="passengers-info-block">
+            <h3 className="section-subheading">Passenger Details</h3>
+            <div className="ticket-passengers-table">
+              <div className="table-header-row">
+                <span>Seat</span>
+                <span>Name</span>
+                <span>Age / Gender</span>
+              </div>
+              {passengers && passengers.length > 0 ? (
+                passengers.map((p, idx) => (
+                  <div key={idx} className="passenger-table-row">
+                    <span className="seat-cell">{p.seatId || seats[idx] || "â€”"}</span>
+                    <span className="name-cell bold">{p.fullName || `Passenger ${idx + 1}`}</span>
+                    <span className="meta-cell">
+                      {p.age ? `${p.age} yrs` : "â€”"} â€¢ {p.gender ? p.gender.charAt(0).toUpperCase() + p.gender.slice(1) : "â€”"}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                seats.map((seatId, idx) => (
+                  <div key={seatId} className="passenger-table-row">
+                    <span className="seat-cell">{seatId}</span>
+                    <span className="name-cell bold">Passenger {idx + 1}</span>
+                    <span className="meta-cell">Seat Reservation Demo</span>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {contact && (contact.email || contact.phone) && (
+              <div className="ticket-contact-pill">
+                <span className="contact-icon" aria-hidden="true">âœ‰ï¸</span>
+                <span>
+                  Notification sent to <strong>{contact.email || "passenger@example.com"}</strong>
+                  {contact.phone && ` â€¢ +91 ${contact.phone}`}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* ===================================================================
+              Demo QR Code Block
+              =================================================================== */}
+          <div className="ticket-qr-block">
+            <div className="qr-box-wrapper" title="Demo QR Code â€” Not for actual travel">
+              {/* Scalable SVG representation of a transit QR code */}
+              <svg
+                viewBox="0 0 120 120"
+                width="120"
+                height="120"
+                className="demo-qr-svg"
+                role="img"
+                aria-label="Demo QR code graphic"
+              >
+                {/* Background */}
+                <rect width="120" height="120" fill="#FFFFFF" rx="8" />
+
+                {/* Top-Left Finder Square */}
+                <rect x="10" y="10" width="30" height="30" fill="#55372D" rx="4" />
+                <rect x="16" y="16" width="18" height="18" fill="#FFFFFF" rx="2" />
+                <rect x="20" y="20" width="10" height="10" fill="#55372D" rx="1" />
+
+                {/* Top-Right Finder Square */}
+                <rect x="80" y="10" width="30" height="30" fill="#55372D" rx="4" />
+                <rect x="86" y="16" width="18" height="18" fill="#FFFFFF" rx="2" />
+                <rect x="90" y="20" width="10" height="10" fill="#55372D" rx="1" />
+
+                {/* Bottom-Left Finder Square */}
+                <rect x="10" y="80" width="30" height="30" fill="#55372D" rx="4" />
+                <rect x="16" y="86" width="18" height="18" fill="#FFFFFF" rx="2" />
+                <rect x="20" y="90" width="10" height="10" fill="#55372D" rx="1" />
+
+                {/* Timing patterns & decorative QR modules */}
+                <rect x="46" y="14" width="6" height="6" fill="#55372D" />
+                <rect x="58" y="14" width="6" height="6" fill="#55372D" />
+                <rect x="68" y="14" width="6" height="6" fill="#55372D" />
+
+                <rect x="14" y="46" width="6" height="6" fill="#55372D" />
+                <rect x="14" y="58" width="6" height="6" fill="#55372D" />
+                <rect x="14" y="68" width="6" height="6" fill="#55372D" />
+
+                <rect x="46" y="46" width="8" height="8" fill="#C96535" />
+                <rect x="66" y="46" width="8" height="8" fill="#55372D" />
+                <rect x="56" y="58" width="8" height="8" fill="#55372D" />
+                <rect x="46" y="70" width="8" height="8" fill="#55372D" />
+                <rect x="66" y="70" width="8" height="8" fill="#C96535" />
+
+                <rect x="82" y="50" width="6" height="6" fill="#55372D" />
+                <rect x="94" y="50" width="6" height="6" fill="#55372D" />
+                <rect x="82" y="66" width="6" height="6" fill="#55372D" />
+                <rect x="102" y="66" width="6" height="6" fill="#55372D" />
+                <rect x="92" y="82" width="6" height="6" fill="#55372D" />
+                <rect x="104" y="94" width="6" height="6" fill="#55372D" />
+
+                <rect x="46" y="90" width="6" height="6" fill="#55372D" />
+                <rect x="58" y="90" width="6" height="6" fill="#55372D" />
+                <rect x="68" y="100" width="6" height="6" fill="#55372D" />
+              </svg>
+
+              {/* Watermark badge over the QR */}
+              <div className="qr-watermark-overlay">
+                <span>DEMO QR</span>
+              </div>
+            </div>
+
+            <div className="qr-caption-text">
+              <span className="qr-label-bold">SIMULATION ONLY</span>
+              <span className="qr-label-desc">Not valid for conductor verification or boarding.</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ===================================================================
+            Fare Breakdown & Payment Mode Strip
+            =================================================================== */}
+        <footer className="ticket-fare-strip">
+          <div className="fare-info-side">
+            <div className="fare-meta-item">
+              <span className="fare-lbl">Base Fare:</span>
+              <span className="fare-num">â‚¹{baseFare}</span>
+            </div>
+            <div className="fare-meta-item">
+              <span className="fare-lbl">Taxes & GST:</span>
+              <span className="fare-num">â‚¹{taxesAndFees}</span>
+            </div>
+            <div className="fare-meta-item">
+              <span className="fare-lbl">Payment Mode:</span>
+              <span className="fare-mode-badge">{paymentMethod}</span>
+            </div>
+          </div>
+
+          <div className="total-paid-box">
+            <span className="total-paid-label">Total Simulated Amount</span>
+            <span className="total-paid-price">â‚¹{totalAmount}</span>
+            <span className="payment-status-pill">
+              {isDirectNavigation ? "UNVERIFIED PREVIEW" : "DEMO SIMULATED"}
+            </span>
+          </div>
+        </footer>
+      </div>
+
+      {/* Ticket Footer Guidelines */}
+      <div className="ticket-instructions-box">
+        <h4>Traveler Notice (Bengal Transit Simulation)</h4>
+        <ul>
+          <li>This slip is an interface mockup produced for system verification.</li>
+          <li>In a production environment, an SMS with the bus conductor PNR would be dispatched.</li>
+          <li>Passengers are advised to reach the boarding bay 15 minutes prior to scheduled departure.</li>
+        </ul>
+      </div>
+    </article>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Passengers\BookingSummarySidebar.jsx ==========
+
+export default function BookingSummarySidebar({
+  bookingData,
+  isFormValid,
+  onSubmit,
+  isDemoFallback,
+}) {
+  const {
+    origin = "Kolkata",
+    destination = "Durgapur",
+    operatorName = "SBSTC Express",
+    busType = "Volvo AC Seater (2+2)",
+    departureTime = "07:30 AM",
+    date = "Today",
+    seats = ["1A", "1B"],
+    passengerCount = 2,
+    farePerSeat = 480,
+    totalFare = 960,
+  } = bookingData || {};
+
+  return (
+    <aside className="passenger-summary-sidebar" aria-label="Journey and Fare Summary">
+      <div className="summary-card-inner">
+        <h3 className="summary-title">Booking Summary</h3>
+
+        {/* Development Fallback Alert if applicable */}
+        {isDemoFallback && (
+          <div className="demo-fallback-badge" role="status">
+            <span className="fallback-pill">DEMO FALLBACK</span>
+            <span>Displaying development fixture booking data for UI demonstration.</span>
+          </div>
+        )}
+
+        {/* Route Card */}
+        <div className="summary-route-box">
+          <div className="route-endpoints">
+            <span className="route-city">{origin}</span>
+            <span className="route-arrow" aria-hidden="true">â†’</span>
+            <span className="route-city">{destination}</span>
+          </div>
+
+          <div className="route-operator-row">
+            <span className="operator-chip">
+              <strong>{operatorName}</strong>
+            </span>
+            <span className="bus-chip">{busType}</span>
+          </div>
+
+          <div className="route-schedule-row">
+            <span className="schedule-item">
+              <span className="item-icon" aria-hidden="true">ðŸ“…</span>
+              <span>{date}</span>
+            </span>
+            <span className="schedule-item">
+              <span className="item-icon" aria-hidden="true">ðŸ•’</span>
+              <span>{departureTime}</span>
+            </span>
+          </div>
+
+          <div className="seats-display-row">
+            <span className="seats-label">Seats ({passengerCount}):</span>
+            <div className="seats-badges-wrap">
+              {seats.map((seatId) => (
+                <span key={seatId} className="seat-num-badge">
+                  {seatId}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Fare Breakdown */}
+        <div className="summary-fare-box">
+          <div className="fare-row">
+            <span>Base Fare ({passengerCount} Ã— â‚¹{farePerSeat})</span>
+            <span className="fare-val">â‚¹{totalFare}</span>
+          </div>
+          <div className="fare-row sub">
+            <span>GST & Transit Charges</span>
+            <span className="fare-free">Included</span>
+          </div>
+          <div className="fare-divider" />
+          <div className="fare-row total">
+            <span>Total Payable</span>
+            <span className="total-val">â‚¹{totalFare}</span>
+          </div>
+        </div>
+
+        {/* Continue Button */}
+        <button
+          type="button"
+          className="continue-passenger-btn"
+          disabled={!isFormValid}
+          onClick={onSubmit}
+          aria-disabled={!isFormValid}
+        >
+          <span>{isFormValid ? "Continue to Next Step â†’" : "Complete Passenger Details"}</span>
+        </button>
+
+        {!isFormValid && (
+          <p className="form-incomplete-hint">
+            Please fill in all passenger names, ages, and contact details above to continue.
+          </p>
+        )}
+
+        <div className="summary-trust-notice">
+          <span className="trust-icon" aria-hidden="true">ðŸ”’</span>
+          <span>Passenger details are kept private & encrypted for transit safety.</span>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Passengers\ContactSection.jsx ==========
+
+export default function ContactSection({
+  contactData,
+  errors,
+  onChange,
+}) {
+  return (
+    <section className="contact-details-card" aria-label="Contact Information">
+      <div className="contact-card-header">
+        <div className="contact-title-group">
+          <span className="contact-icon-badge" aria-hidden="true">ðŸ“±</span>
+          <div>
+            <h3 className="contact-title">Contact & Ticket Delivery</h3>
+            <p className="contact-subtitle">
+              Your e-ticket and live bus updates will be sent here.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="contact-inputs-grid">
+        {/* Email Address */}
+        <div className="input-group">
+          <label htmlFor="contact-email" className="clay-label">
+            Email Address <span className="req-star">*</span>
+          </label>
+          <div className={`clay-input-wrapper ${errors.email ? "has-error" : ""}`}>
+            <span className="field-icon" aria-hidden="true">âœ‰ï¸</span>
+            <input
+              id="contact-email"
+              type="email"
+              placeholder="e.g. debashis@example.com"
+              value={contactData.email || ""}
+              onChange={(e) => onChange("email", e.target.value)}
+              aria-invalid={Boolean(errors.email)}
+              aria-describedby={errors.email ? "contact-email-err" : undefined}
+            />
+          </div>
+          {errors.email && (
+            <span id="contact-email-err" className="inline-err-msg" role="alert">
+              {errors.email}
+            </span>
+          )}
+        </div>
+
+        {/* Mobile Number */}
+        <div className="input-group">
+          <label htmlFor="contact-phone" className="clay-label">
+            Mobile Number <span className="req-star">*</span>
+          </label>
+          <div className={`clay-input-wrapper phone-wrapper ${errors.phone ? "has-error" : ""}`}>
+            <span className="country-code-pill">+91</span>
+            <input
+              id="contact-phone"
+              type="tel"
+              placeholder="98765 43210"
+              maxLength={10}
+              value={contactData.phone || ""}
+              onChange={(e) => {
+                const numeric = e.target.value.replace(/\D/g, "").slice(0, 10);
+                onChange("phone", numeric);
+              }}
+              aria-invalid={Boolean(errors.phone)}
+              aria-describedby={errors.phone ? "contact-phone-err" : undefined}
+            />
+          </div>
+          {errors.phone && (
+            <span id="contact-phone-err" className="inline-err-msg" role="alert">
+              {errors.phone}
+            </span>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Passengers\PassengerCard.jsx ==========
+
+export default function PassengerCard({
+  passengerIndex,
+  seatId,
+  passengerData,
+  errors,
+  onChange,
+}) {
+  const genderOptions = [
+    { id: "male", label: "Male" },
+    { id: "female", label: "Female" },
+    { id: "other", label: "Other" },
+  ];
+
+  return (
+    <div className="passenger-form-card" aria-label={`Passenger ${passengerIndex + 1} Details`}>
+      <div className="passenger-card-header">
+        <div className="passenger-title-group">
+          <span className="passenger-num-badge">P{passengerIndex + 1}</span>
+          <div>
+            <h3 className="passenger-card-title">Passenger {passengerIndex + 1}</h3>
+            <span className="passenger-seat-tag">Assigned to Seat <strong>{seatId}</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div className="passenger-inputs-grid">
+        {/* Full Name */}
+        <div className="input-group name-group">
+          <label htmlFor={`p-${passengerIndex}-name`} className="clay-label">
+            Full Name <span className="req-star">*</span>
+          </label>
+          <div className={`clay-input-wrapper ${errors.fullName ? "has-error" : ""}`}>
+            <span className="field-icon" aria-hidden="true">ðŸ‘¤</span>
+            <input
+              id={`p-${passengerIndex}-name`}
+              type="text"
+              placeholder="e.g. Debashis Mukherjee"
+              value={passengerData.fullName || ""}
+              onChange={(e) => onChange("fullName", e.target.value)}
+              aria-invalid={Boolean(errors.fullName)}
+              aria-describedby={errors.fullName ? `p-${passengerIndex}-name-err` : undefined}
+            />
+          </div>
+          {errors.fullName && (
+            <span id={`p-${passengerIndex}-name-err`} className="inline-err-msg" role="alert">
+              {errors.fullName}
+            </span>
+          )}
+        </div>
+
+        {/* Age */}
+        <div className="input-group age-group">
+          <label htmlFor={`p-${passengerIndex}-age`} className="clay-label">
+            Age <span className="req-star">*</span>
+          </label>
+          <div className={`clay-input-wrapper ${errors.age ? "has-error" : ""}`}>
+            <span className="field-icon" aria-hidden="true">ðŸŽ‚</span>
+            <input
+              id={`p-${passengerIndex}-age`}
+              type="number"
+              min={1}
+              max={120}
+              placeholder="e.g. 28"
+              value={passengerData.age || ""}
+              onChange={(e) => onChange("age", e.target.value)}
+              aria-invalid={Boolean(errors.age)}
+              aria-describedby={errors.age ? `p-${passengerIndex}-age-err` : undefined}
+            />
+          </div>
+          {errors.age && (
+            <span id={`p-${passengerIndex}-age-err`} className="inline-err-msg" role="alert">
+              {errors.age}
+            </span>
+          )}
+        </div>
+
+        {/* Gender Selection */}
+        <div className="input-group gender-group">
+          <span className="clay-label">
+            Gender <span className="req-star">*</span>
+          </span>
+          <div className="gender-radios-row" role="radiogroup" aria-label={`Gender for passenger ${passengerIndex + 1}`}>
+            {genderOptions.map((opt) => (
+              <label
+                key={opt.id}
+                className={`gender-chip-label ${passengerData.gender === opt.id ? "selected" : ""}`}
+              >
+                <input
+                  type="radio"
+                  name={`gender-p-${passengerIndex}`}
+                  value={opt.id}
+                  checked={passengerData.gender === opt.id}
+                  onChange={() => onChange("gender", opt.id)}
+                />
+                <span className="chip-indicator" />
+                <span>{opt.label}</span>
+              </label>
+            ))}
+          </div>
+          {errors.gender && (
+            <span className="inline-err-msg" role="alert">
+              {errors.gender}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Passengers\PassengerConfirmationModal.jsx ==========
+
+export default function PassengerConfirmationModal({
+  bookingData,
+  passengersList,
+  contactData,
+  onClose,
+  onNavigate,
+}) {
+  const {
+    origin = "Kolkata",
+    destination = "Durgapur",
+    operatorName = "SBSTC Express",
+    totalFare = 960,
+  } = bookingData || {};
+
+  return (
+    <div className="modal-backdrop" onClick={onClose} role="presentation">
+      <div
+        className="passenger-modal-card"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-p-title"
+      >
+        <div className="modal-header">
+          <div className="modal-title-row">
+            <span className="modal-badge-icon" aria-hidden="true">ðŸ“‹</span>
+            <div>
+              <span className="milestone-chip">PHASE 4 MILESTONE COMPLETED</span>
+              <h2 id="confirm-p-title">Passenger Details Saved</h2>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="modal-close-btn"
+            onClick={onClose}
+            aria-label="Close dialog"
+          >
+            âœ•
+          </button>
+        </div>
+
+        <div className="modal-body">
+          <div className="confirm-trip-strip">
+            <span className="trip-text">
+              <strong>{origin} â†’ {destination}</strong> ({operatorName})
+            </span>
+            <span className="trip-amount">Total: â‚¹{totalFare}</span>
+          </div>
+
+          <div className="passengers-review-list">
+            <h4 className="review-heading">Registered Passengers</h4>
+            {passengersList.map((p, idx) => (
+              <div key={idx} className="passenger-review-item">
+                <span className="p-seat-pill">Seat {p.seatId}</span>
+                <div className="p-info">
+                  <span className="p-name">{p.fullName}</span>
+                  <span className="p-meta">
+                    {p.age} yrs â€¢ {p.gender ? p.gender.charAt(0).toUpperCase() + p.gender.slice(1) : "Not specified"}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="contact-review-box">
+            <h4 className="review-heading">Delivery Contact</h4>
+            <div className="contact-review-grid">
+              <div>
+                <span className="c-label">Email:</span>
+                <span className="c-val">{contactData.email}</span>
+              </div>
+              <div>
+                <span className="c-label">Mobile:</span>
+                <span className="c-val">+91 {contactData.phone}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="phase-completion-notice" role="status">
+            <p>
+              âœ… <strong>Phase 4 Frontend Complete:</strong> All passenger forms, required field validations, 
+              age constraints, contact validation, and layout responsiveness have been verified.
+            </p>
+          </div>
+        </div>
+
+        <div className="modal-footer">
+          <button
+            type="button"
+            className="modal-secondary-btn"
+            onClick={onClose}
+          >
+            Edit Passenger Details
+          </button>
+          <button
+            type="button"
+            className="modal-primary-btn"
+            onClick={() => {
+              onClose();
+              if (onNavigate) {
+                onNavigate("payment", {
+                  ...bookingData,
+                  passengers: passengersList,
+                  contact: contactData,
+                });
+              }
+            }}
+          >
+            Proceed to Payment â†’
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Passengers\PassengerDetailsPage.jsx ==========
+
+import { useState, useMemo } from "react";
+import PassengerCard from "./PassengerCard";
+import ContactSection from "./ContactSection";
+import BookingSummarySidebar from "./BookingSummarySidebar";
+import PassengerConfirmationModal from "./PassengerConfirmationModal";
+import "./Passengers.css";
+
+const FALLBACK_BOOKING = {
+  tripId: "BB-101",
+  operatorName: "SBSTC Express (Demo)",
+  busType: "Volvo AC Seater (2+2)",
+  origin: "Kolkata (Esplanade)",
+  destination: "Durgapur (City Centre)",
+  departureTime: "07:30 AM",
+  date: "Today",
+  seats: ["1A", "1B"],
+  passengerCount: 2,
+  farePerSeat: 480,
+  baseFare: 960,
+  taxesAndFees: 48,
+  totalAmount: 1008,
+  totalFare: 1008,
+  isDemoFallback: true,
+};
+
+export default function PassengerDetailsPage({
+  bookingData,
+  onNavigate,
+}) {
+  // Graceful fallback if booking state is missing (Requirement 7 & 8)
+  const isDemoFallback = !bookingData || !bookingData.seats || bookingData.seats.length === 0;
+  const activeBooking = isDemoFallback ? FALLBACK_BOOKING : bookingData;
+
+  // Initialize passenger form states based on seats count
+  const seatsList = activeBooking.seats || ["1A"];
+  
+  const [passengers, setPassengers] = useState(() =>
+    seatsList.map((seatId) => ({
+      seatId,
+      fullName: "",
+      age: "",
+      gender: "",
+    }))
+  );
+
+  const [contact, setContact] = useState({
+    email: "",
+    phone: "",
+  });
+
+  const [passengerErrors, setPassengerErrors] = useState(() =>
+    seatsList.map(() => ({}))
+  );
+
+  const [contactErrors, setContactErrors] = useState({});
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+
+  // Field change handlers
+  const handlePassengerChange = (index, field, value) => {
+    setPassengers((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+
+    // Clear error for that field if valid
+    setPassengerErrors((prev) => {
+      const updated = [...prev];
+      const fieldErrors = { ...updated[index] };
+
+      if (field === "fullName" && value.trim().length >= 2) {
+        delete fieldErrors.fullName;
+      }
+      if (field === "age") {
+        const num = parseInt(value, 10);
+        if (num >= 1 && num <= 120) delete fieldErrors.age;
+      }
+      if (field === "gender" && value) {
+        delete fieldErrors.gender;
+      }
+
+      updated[index] = fieldErrors;
+      return updated;
+    });
+  };
+
+  const handleContactChange = (field, value) => {
+    setContact((prev) => ({ ...prev, [field]: value }));
+
+    // Clear error if valid
+    setContactErrors((prev) => {
+      const updated = { ...prev };
+      if (field === "email" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) {
+        delete updated.email;
+      }
+      if (field === "phone" && /^\d{10}$/.test(value.trim())) {
+        delete updated.phone;
+      }
+      return updated;
+    });
+  };
+
+  // Validate all inputs and compute validity
+  const validateAll = () => {
+    let isValid = true;
+
+    // Validate each passenger
+    const newPassengerErrors = passengers.map((p) => {
+      const errors = {};
+      if (!p.fullName || p.fullName.trim().length < 2) {
+        errors.fullName = "Name is required (min 2 characters)";
+        isValid = false;
+      }
+      const ageNum = parseInt(p.age, 10);
+      if (isNaN(ageNum) || ageNum < 1 || ageNum > 120) {
+        errors.age = "Age must be between 1 and 120";
+        isValid = false;
+      }
+      if (!p.gender) {
+        errors.gender = "Please select a gender";
+        isValid = false;
+      }
+      return errors;
+    });
+
+    // Validate contact info
+    const newContactErrors = {};
+    if (!contact.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email.trim())) {
+      newContactErrors.email = "Please enter a valid email address";
+      isValid = false;
+    }
+    if (!contact.phone || !/^\d{10}$/.test(contact.phone.trim())) {
+      newContactErrors.phone = "Enter a valid 10-digit mobile number";
+      isValid = false;
+    }
+
+    setPassengerErrors(newPassengerErrors);
+    setContactErrors(newContactErrors);
+
+    return isValid;
+  };
+
+  // Check if form is currently valid without showing errors
+  const isFormValid = useMemo(() => {
+    const allPassengersFilled = passengers.every(
+      (p) =>
+        p.fullName.trim().length >= 2 &&
+        parseInt(p.age, 10) >= 1 &&
+        parseInt(p.age, 10) <= 120 &&
+        Boolean(p.gender)
+    );
+
+    const contactFilled =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email.trim()) &&
+      /^\d{10}$/.test(contact.phone.trim());
+
+    return allPassengersFilled && contactFilled;
+  }, [passengers, contact]);
+
+  const handleSubmit = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+
+    if (!validateAll()) {
+      return;
+    }
+
+    // Form is valid! Open Phase 4 completion modal (Requirement 6)
+    setIsConfirmationOpen(true);
+  };
+
+  const handleBackToSeats = () => {
+    if (activeBooking?.tripId) {
+      onNavigate("seats", { tripId: activeBooking.tripId });
+    } else {
+      onNavigate("search");
+    }
+  };
+
+  return (
+    <main className="passengers-page-container">
+      {/* Top Header & Breadcrumb */}
+      <div className="passengers-top-bar">
+        <button
+          type="button"
+          className="back-nav-btn"
+          onClick={handleBackToSeats}
+          aria-label="Back to seat selection"
+        >
+          <span aria-hidden="true">â†</span>
+          <span>Back to Seat Selection</span>
+        </button>
+
+        <div className="booking-stepper-pill">
+          <span className="step-complete">1. Search âœ“</span>
+          <span className="step-arrow">â€º</span>
+          <span className="step-complete">2. Seats âœ“</span>
+          <span className="step-arrow">â€º</span>
+          <span className="step-active">3. Passengers</span>
+        </div>
+      </div>
+
+      {/* Development Fallback Alert Notice */}
+      {isDemoFallback && (
+        <div className="fallback-banner" role="status">
+          <span className="banner-badge">DEMO FALLBACK</span>
+          <p>
+            No active seat selection was found from a previous step (direct visit or refresh). 
+            Displaying development fallback data for <strong>{activeBooking.origin} â†’ {activeBooking.destination}</strong> (Seats {seatsList.join(", ")}).
+          </p>
+        </div>
+      )}
+
+      <header className="passengers-page-heading">
+        <span className="heading-eyebrow">PASSENGER INFORMATION</span>
+        <h1>Enter Passenger Details</h1>
+        <p className="heading-subtext">
+          Please provide details for each passenger as printed on official photo ID.
+        </p>
+      </header>
+
+      {/* Main Two-Column Grid: Passenger Forms + Booking Summary Sidebar */}
+      <div className="passengers-main-grid">
+        {/* Left Column: Passenger Cards & Contact Section */}
+        <div className="forms-column">
+          <form onSubmit={handleSubmit} noValidate>
+            <div className="passenger-cards-stack">
+              {passengers.map((passenger, idx) => (
+                <PassengerCard
+                  key={passenger.seatId || idx}
+                  passengerIndex={idx}
+                  seatId={passenger.seatId}
+                  passengerData={passenger}
+                  errors={passengerErrors[idx] || {}}
+                  onChange={(field, val) => handlePassengerChange(idx, field, val)}
+                />
+              ))}
+            </div>
+
+            <ContactSection
+              contactData={contact}
+              errors={contactErrors}
+              onChange={handleContactChange}
+            />
+          </form>
+        </div>
+
+        {/* Right Column: Order Summary & Continue CTA */}
+        <div className="summary-column">
+          <BookingSummarySidebar
+            bookingData={activeBooking}
+            isFormValid={isFormValid}
+            onSubmit={handleSubmit}
+            isDemoFallback={isDemoFallback}
+          />
+        </div>
+      </div>
+
+      {/* Confirmation Modal upon Form Submission */}
+      {isConfirmationOpen && (
+        <PassengerConfirmationModal
+          bookingData={activeBooking}
+          passengersList={passengers}
+          contactData={contact}
+          onClose={() => setIsConfirmationOpen(false)}
+          onNavigate={onNavigate}
+        />
+      )}
+    </main>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Payment\DemoPaymentModal.jsx ==========
+
+import { useState } from "react";
+
+export default function DemoPaymentModal({
+  bookingData,
+  selectedMethod,
+  paymentDetails,
+  onClose,
+  onNavigate,
+}) {
+  const {
+    origin = "Kolkata",
+    destination = "Durgapur",
+    operatorName = "SBSTC Express",
+    seats = ["1A", "1B"],
+    passengerCount = 2,
+    totalAmount = 1008,
+  } = bookingData || {};
+
+  const [demoRef] = useState(() => `DEMO-PAY-${Math.floor(100000 + Math.random() * 900000)}`);
+
+  const getMethodSummary = () => {
+    switch (selectedMethod) {
+      case "upi":
+        return paymentDetails?.upiId
+          ? `UPI (${paymentDetails.upiId})`
+          : `UPI (${paymentDetails?.upiApp || "Google Pay"})`;
+      case "card":
+        return paymentDetails?.cardNumber
+          ? `Card ending in ${paymentDetails.cardNumber.replace(/\s/g, "").slice(-4) || "4242"}`
+          : "Credit / Debit Card";
+      case "netbanking":
+        return `Net Banking (${paymentDetails?.selectedBank || "SBI"})`;
+      case "wallet":
+        return `Wallet (${paymentDetails?.walletName || "Amazon Pay"})`;
+      default:
+        return "Simulated Payment";
+    }
+  };
+
+  return (
+    <div className="modal-backdrop" onClick={onClose} role="presentation">
+      <div
+        className="demo-payment-modal-card"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="demo-payment-title"
+      >
+        <div className="modal-header">
+          <div className="modal-title-row">
+            <span className="modal-icon-badge" aria-hidden="true">ðŸ’³</span>
+            <div>
+              <span className="phase-indicator-pill">PHASE 5 MILESTONE</span>
+              <h2 id="demo-payment-title">Demo Payment Response</h2>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="modal-close-btn"
+            onClick={onClose}
+            aria-label="Close dialog"
+          >
+            âœ•
+          </button>
+        </div>
+
+        <div className="modal-body">
+          {/* Truthful Disclaimer Alert */}
+          <div className="demo-disclaimer-card" role="alert">
+            <span className="alert-badge">NO REAL CHARGE</span>
+            <p className="disclaimer-text">
+              <strong>No money was charged.</strong> This is a development milestone demonstration. 
+              No financial transaction was submitted to any banking gateway or payment processor.
+            </p>
+          </div>
+
+          {/* Transaction Metadata Grid */}
+          <div className="demo-details-grid">
+            <div className="detail-item">
+              <span className="detail-label">Demo Reference ID</span>
+              <span className="detail-value code-font">{demoRef}</span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Status</span>
+              <span className="detail-value status-demo">Simulated Placeholder</span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Journey</span>
+              <span className="detail-value">{origin} â†’ {destination}</span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Operator</span>
+              <span className="detail-value">{operatorName}</span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Reserved Seats</span>
+              <span className="detail-value">
+                {seats.join(", ")} ({passengerCount} {passengerCount === 1 ? "seat" : "seats"})
+              </span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Payment Method</span>
+              <span className="detail-value">{getMethodSummary()}</span>
+            </div>
+            <div className="detail-item full-width">
+              <span className="detail-label">Simulated Amount</span>
+              <span className="detail-value amount-highlight">â‚¹{totalAmount}</span>
+            </div>
+          </div>
+
+          <div className="milestone-note-box">
+            <p>
+              ðŸŽ‰ <strong>Payment UI Verified:</strong> All inputs, selection states, fare calculations, 
+              and responsive layouts are working smoothly. Production payment gateway credentials 
+              can be hooked up in later integration phases.
+            </p>
+          </div>
+        </div>
+
+        <div className="modal-footer">
+          <button
+            type="button"
+            className="modal-secondary-btn"
+            onClick={() => {
+              onClose();
+              onNavigate("dashboard");
+            }}
+          >
+            Dashboard
+          </button>
+          <button
+            type="button"
+            className="modal-primary-btn"
+            onClick={() => {
+              onClose();
+              if (onNavigate) {
+                onNavigate("confirmation", {
+                  ...bookingData,
+                  bookingId: demoRef,
+                  selectedMethod,
+                  paymentDetails,
+                  confirmedAt: new Date().toISOString(),
+                });
+              }
+            }}
+          >
+            View E-Ticket & Confirmation â†’
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Payment\PaymentMethods.jsx ==========
+
+import { useState } from "react";
+
+export default function PaymentMethods({
+  selectedMethod,
+  onSelectMethod,
+  paymentDetails,
+  onUpdatePaymentDetails,
+}) {
+  const [activeUpiApp, setActiveUpiApp] = useState("gpay");
+
+  const popularBanks = [
+    { id: "sbi", name: "State Bank of India", code: "SBI" },
+    { id: "hdfc", name: "HDFC Bank", code: "HDFC" },
+    { id: "icici", name: "ICICI Bank", code: "ICICI" },
+    { id: "axis", name: "Axis Bank", code: "AXIS" },
+    { id: "pnb", name: "Punjab National Bank", code: "PNB" },
+  ];
+
+  const upiApps = [
+    { id: "gpay", name: "Google Pay", icon: "ðŸŒ" },
+    { id: "phonepe", name: "PhonePe", icon: "ðŸ“±" },
+    { id: "paytm", name: "Paytm UPI", icon: "âš¡" },
+    { id: "bhim", name: "BHIM UPI", icon: "ðŸ‡®ðŸ‡³" },
+  ];
+
+  const handleCardNumberChange = (e) => {
+    // Format card number with spaces every 4 digits
+    const clean = e.target.value.replace(/\D/g, "").slice(0, 16);
+    const formatted = clean.replace(/(\d{4})(?=\d)/g, "$1 ");
+    onUpdatePaymentDetails({ ...paymentDetails, cardNumber: formatted });
+  };
+
+  const handleExpiryChange = (e) => {
+    const clean = e.target.value.replace(/\D/g, "").slice(0, 4);
+    const formatted = clean.length > 2 ? `${clean.slice(0, 2)}/${clean.slice(2)}` : clean;
+    onUpdatePaymentDetails({ ...paymentDetails, cardExpiry: formatted });
+  };
+
+  const handleCvvChange = (e) => {
+    const clean = e.target.value.replace(/\D/g, "").slice(0, 3);
+    onUpdatePaymentDetails({ ...paymentDetails, cardCvv: clean });
+  };
+
+  return (
+    <section className="payment-methods-card" aria-label="Payment Options">
+      <div className="methods-card-header">
+        <h2>Select Payment Method</h2>
+        <span className="secure-badge" aria-label="Mock secure checkout">
+          <span className="lock-icon" aria-hidden="true">ðŸ”’</span>
+          Secure Checkout Demo
+        </span>
+      </div>
+
+      <div className="methods-accordion">
+        {/* ===================================================================
+            Option 1: UPI
+            =================================================================== */}
+        <div className={`method-panel ${selectedMethod === "upi" ? "active" : ""}`}>
+          <label className="method-header-label">
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="upi"
+              checked={selectedMethod === "upi"}
+              onChange={() => onSelectMethod("upi")}
+            />
+            <span className="clay-radio-circle" />
+            <span className="method-title-wrap">
+              <span className="method-main-title">
+                <span className="method-icon-badge" aria-hidden="true">âš¡</span>
+                UPI (Instant & Free)
+              </span>
+              <span className="method-sub-desc">Google Pay, PhonePe, Paytm, QR</span>
+            </span>
+            <span className="method-badge-fast">Fastest</span>
+          </label>
+
+          {selectedMethod === "upi" && (
+            <div className="method-content-body">
+              {/* Quick UPI App Selector */}
+              <div className="upi-apps-row" role="radiogroup" aria-label="Choose UPI Application">
+                {upiApps.map((app) => (
+                  <button
+                    key={app.id}
+                    type="button"
+                    className={`upi-app-chip ${activeUpiApp === app.id ? "selected" : ""}`}
+                    onClick={() => {
+                      setActiveUpiApp(app.id);
+                      onUpdatePaymentDetails({
+                        ...paymentDetails,
+                        upiApp: app.name,
+                      });
+                    }}
+                    role="radio"
+                    aria-checked={activeUpiApp === app.id}
+                  >
+                    <span className="app-icon" aria-hidden="true">{app.icon}</span>
+                    <span className="app-name">{app.name}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Or Enter UPI ID */}
+              <div className="upi-input-block">
+                <label htmlFor="upi-id-input" className="input-field-label">
+                  Or enter UPI ID / VPA
+                </label>
+                <div className="clay-input-box">
+                  <input
+                    id="upi-id-input"
+                    type="text"
+                    placeholder="e.g. mobileNumber@upi or user@okhdfcbank"
+                    value={paymentDetails.upiId || ""}
+                    onChange={(e) =>
+                      onUpdatePaymentDetails({
+                        ...paymentDetails,
+                        upiId: e.target.value,
+                      })
+                    }
+                  />
+                  <span className="verified-pill">Demo Mode</span>
+                </div>
+                <small className="field-hint">
+                  A mock payment request will be sent to your UPI app for approval.
+                </small>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ===================================================================
+            Option 2: Credit / Debit Card
+            =================================================================== */}
+        <div className={`method-panel ${selectedMethod === "card" ? "active" : ""}`}>
+          <label className="method-header-label">
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="card"
+              checked={selectedMethod === "card"}
+              onChange={() => onSelectMethod("card")}
+            />
+            <span className="clay-radio-circle" />
+            <span className="method-title-wrap">
+              <span className="method-main-title">
+                <span className="method-icon-badge" aria-hidden="true">ðŸ’³</span>
+                Credit / Debit Card
+              </span>
+              <span className="method-sub-desc">Visa, Mastercard, RuPay, Maestro</span>
+            </span>
+          </label>
+
+          {selectedMethod === "card" && (
+            <div className="method-content-body">
+              <div className="card-form-grid">
+                {/* Card Number */}
+                <div className="form-field full-width">
+                  <label htmlFor="card-number" className="input-field-label">
+                    Card Number
+                  </label>
+                  <div className="clay-input-box">
+                    <input
+                      id="card-number"
+                      type="text"
+                      placeholder="1234 5678 9012 3456"
+                      value={paymentDetails.cardNumber || ""}
+                      onChange={handleCardNumberChange}
+                      maxLength={19}
+                    />
+                    <span className="card-brand-badge" aria-hidden="true">ðŸ’³ Card</span>
+                  </div>
+                </div>
+
+                {/* Cardholder Name */}
+                <div className="form-field full-width">
+                  <label htmlFor="card-name" className="input-field-label">
+                    Cardholder Name
+                  </label>
+                  <div className="clay-input-box">
+                    <input
+                      id="card-name"
+                      type="text"
+                      placeholder="Name as printed on card"
+                      value={paymentDetails.cardName || ""}
+                      onChange={(e) =>
+                        onUpdatePaymentDetails({
+                          ...paymentDetails,
+                          cardName: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+
+                {/* Expiry Date */}
+                <div className="form-field half-width">
+                  <label htmlFor="card-expiry" className="input-field-label">
+                    Valid Thru (MM/YY)
+                  </label>
+                  <div className="clay-input-box">
+                    <input
+                      id="card-expiry"
+                      type="text"
+                      placeholder="MM/YY"
+                      value={paymentDetails.cardExpiry || ""}
+                      onChange={handleExpiryChange}
+                      maxLength={5}
+                    />
+                  </div>
+                </div>
+
+                {/* CVV */}
+                <div className="form-field half-width">
+                  <label htmlFor="card-cvv" className="input-field-label">
+                    CVV / CVC
+                  </label>
+                  <div className="clay-input-box">
+                    <input
+                      id="card-cvv"
+                      type="password"
+                      placeholder="â€¢â€¢â€¢"
+                      value={paymentDetails.cardCvv || ""}
+                      onChange={handleCvvChange}
+                      maxLength={3}
+                    />
+                    <span className="cvv-hint" title="3-digit security code on card back">?</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mock-card-notice">
+                <span className="notice-icon" aria-hidden="true">â„¹ï¸</span>
+                <span>Demo card inputs. Do NOT enter genuine bank account or card information.</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ===================================================================
+            Option 3: Net Banking
+            =================================================================== */}
+        <div className={`method-panel ${selectedMethod === "netbanking" ? "active" : ""}`}>
+          <label className="method-header-label">
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="netbanking"
+              checked={selectedMethod === "netbanking"}
+              onChange={() => onSelectMethod("netbanking")}
+            />
+            <span className="clay-radio-circle" />
+            <span className="method-title-wrap">
+              <span className="method-main-title">
+                <span className="method-icon-badge" aria-hidden="true">ðŸ¦</span>
+                Net Banking
+              </span>
+              <span className="method-sub-desc">All major Indian banks supported</span>
+            </span>
+          </label>
+
+          {selectedMethod === "netbanking" && (
+            <div className="method-content-body">
+              <span className="sub-heading-label">Popular Banks</span>
+              <div className="banks-grid" role="radiogroup" aria-label="Select Bank">
+                {popularBanks.map((bank) => (
+                  <button
+                    key={bank.id}
+                    type="button"
+                    className={`bank-chip-btn ${paymentDetails.selectedBank === bank.code ? "selected" : ""}`}
+                    onClick={() =>
+                      onUpdatePaymentDetails({
+                        ...paymentDetails,
+                        selectedBank: bank.code,
+                      })
+                    }
+                    role="radio"
+                    aria-checked={paymentDetails.selectedBank === bank.code}
+                  >
+                    <span className="bank-logo" aria-hidden="true">ðŸ›ï¸</span>
+                    <span className="bank-name">{bank.code}</span>
+                  </button>
+                ))}
+              </div>
+
+              <div className="other-banks-row">
+                <label htmlFor="all-banks-select" className="input-field-label">
+                  Or choose other bank
+                </label>
+                <div className="clay-select-box">
+                  <select
+                    id="all-banks-select"
+                    value={paymentDetails.selectedBank || ""}
+                    onChange={(e) =>
+                      onUpdatePaymentDetails({
+                        ...paymentDetails,
+                        selectedBank: e.target.value,
+                      })
+                    }
+                  >
+                    <option value="">Select from all banks</option>
+                    <option value="SBI">State Bank of India (SBI)</option>
+                    <option value="HDFC">HDFC Bank</option>
+                    <option value="ICICI">ICICI Bank</option>
+                    <option value="AXIS">Axis Bank</option>
+                    <option value="PNB">Punjab National Bank</option>
+                    <option value="BOB">Bank of Baroda</option>
+                    <option value="CANARA">Canara Bank</option>
+                    <option value="UBI">Union Bank of India</option>
+                    <option value="IDBI">IDBI Bank</option>
+                    <option value="BANDHAN">Bandhan Bank</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ===================================================================
+            Option 4: Mobile Wallets
+            =================================================================== */}
+        <div className={`method-panel ${selectedMethod === "wallet" ? "active" : ""}`}>
+          <label className="method-header-label">
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="wallet"
+              checked={selectedMethod === "wallet"}
+              onChange={() => onSelectMethod("wallet")}
+            />
+            <span className="clay-radio-circle" />
+            <span className="method-title-wrap">
+              <span className="method-main-title">
+                <span className="method-icon-badge" aria-hidden="true">ðŸ‘›</span>
+                Mobile Wallets
+              </span>
+              <span className="method-sub-desc">Amazon Pay, Paytm Wallet, Mobikwik</span>
+            </span>
+          </label>
+
+          {selectedMethod === "wallet" && (
+            <div className="method-content-body">
+              <div className="wallet-options-row">
+                {["Amazon Pay", "Paytm Wallet", "Mobikwik"].map((walletName) => (
+                  <button
+                    key={walletName}
+                    type="button"
+                    className={`wallet-chip-btn ${paymentDetails.walletName === walletName ? "selected" : ""}`}
+                    onClick={() =>
+                      onUpdatePaymentDetails({
+                        ...paymentDetails,
+                        walletName,
+                      })
+                    }
+                  >
+                    <span className="wallet-icon" aria-hidden="true">ðŸ’°</span>
+                    <span>{walletName}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Payment\PaymentPage.jsx ==========
+
+import { useState } from "react";
+import PaymentMethods from "./PaymentMethods";
+import PaymentSummary from "./PaymentSummary";
+import DemoPaymentModal from "./DemoPaymentModal";
+import "./Payment.css";
+
+export default function PaymentPage({
+  bookingData,
+  onNavigate,
+}) {
+  const [selectedMethod, setSelectedMethod] = useState("upi");
+  const [paymentDetails, setPaymentDetails] = useState({
+    upiApp: "Google Pay",
+    upiId: "",
+    cardNumber: "",
+    cardName: "",
+    cardExpiry: "",
+    cardCvv: "",
+    selectedBank: "SBI",
+    walletName: "Amazon Pay",
+  });
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
+  const [validationError, setValidationError] = useState("");
+
+  // Handle missing booking data gracefully (Requirement 7)
+  if (!bookingData || !bookingData.seats || bookingData.seats.length === 0) {
+    return (
+      <main className="payment-page-container">
+        <div className="missing-booking-card" role="alert">
+          <div className="missing-icon-circle" aria-hidden="true">
+            ðŸŽ«
+          </div>
+          <h2>No Active Booking Found</h2>
+          <p className="missing-desc">
+            You don't have an active seat selection in this session. 
+            Please search for a bus and choose your seats before proceeding to payment.
+          </p>
+
+          <div className="missing-actions-row">
+            <button
+              type="button"
+              className="back-btn-secondary"
+              onClick={() => onNavigate("dashboard")}
+            >
+              â† Go to Dashboard
+            </button>
+            <button
+              type="button"
+              className="back-btn-secondary"
+              onClick={() => onNavigate("seats", { tripId: "BB-101" })}
+            >
+              â† Back to Seat Selection
+            </button>
+            <button
+              type="button"
+              className="back-btn-primary"
+              onClick={() => onNavigate("search")}
+            >
+              Search Buses â†’
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  const handlePayNow = () => {
+    setValidationError("");
+
+    // Validate that a payment method is selected (Requirement 5)
+    if (!selectedMethod) {
+      setValidationError("Please select a payment method before continuing.");
+      return;
+    }
+
+    // Basic method validation
+    if (selectedMethod === "card") {
+      const cleanCard = (paymentDetails.cardNumber || "").replace(/\s/g, "");
+      if (cleanCard.length < 16) {
+        setValidationError("Please enter a valid 16-digit card number.");
+        return;
+      }
+      if (!paymentDetails.cardExpiry || paymentDetails.cardExpiry.length < 5) {
+        setValidationError("Please enter card expiry date (MM/YY).");
+        return;
+      }
+      if (!paymentDetails.cardCvv || paymentDetails.cardCvv.length < 3) {
+        setValidationError("Please enter the 3-digit CVV.");
+        return;
+      }
+    } else if (selectedMethod === "upi") {
+      if (paymentDetails.upiId && !paymentDetails.upiId.includes("@")) {
+        setValidationError("Please enter a valid UPI ID (e.g. mobile@upi or username@bank).");
+        return;
+      }
+    }
+
+    // Simulate mock payment processing without charging money (Requirement 6)
+    setIsProcessing(true);
+    setTimeout(() => {
+      setIsProcessing(false);
+      setIsDemoModalOpen(true);
+    }, 600);
+  };
+
+  const handleBackToPrevious = () => {
+    if (bookingData?.passengers && bookingData.passengers.length > 0) {
+      onNavigate("passengers", bookingData);
+    } else if (bookingData?.tripId) {
+      onNavigate("seats", { tripId: bookingData.tripId });
+    } else {
+      onNavigate("search");
+    }
+  };
+
+  const hasPassengers = Boolean(bookingData?.passengers && bookingData.passengers.length > 0);
+
+  return (
+    <main className="payment-page-container">
+      {/* Top Header: Breadcrumb & Back navigation */}
+      <div className="payment-top-bar">
+        <button
+          type="button"
+          className="back-to-step-btn"
+          onClick={handleBackToPrevious}
+          aria-label="Back to previous booking step"
+        >
+          <span aria-hidden="true">â†</span>
+          <span>
+            {hasPassengers ? "Back to Passenger Details" : "Back to Seat Selection"}
+          </span>
+        </button>
+
+        <div className="step-tracker-pill">
+          <span className="step-done">1. Search âœ“</span>
+          <span className="step-sep">â€º</span>
+          <span className="step-done">2. Seats âœ“</span>
+          <span className="step-sep">â€º</span>
+          <span className="step-done">3. Passengers âœ“</span>
+          <span className="step-sep">â€º</span>
+          <span className="step-current">4. Payment</span>
+        </div>
+      </div>
+
+      <header className="payment-page-heading">
+        <span className="payment-eyebrow">CHECKOUT & BILLING</span>
+        <h1>Payment & Confirmation</h1>
+        <p className="payment-subtext">
+          Review your journey details and choose your preferred payment method.
+        </p>
+      </header>
+
+      {/* Two-Column Responsive Layout */}
+      <div className="payment-main-grid">
+        {/* Left Column: Payment Method Selection */}
+        <div className="payment-left-col">
+          <PaymentMethods
+            selectedMethod={selectedMethod}
+            onSelectMethod={(method) => {
+              setSelectedMethod(method);
+              setValidationError("");
+            }}
+            paymentDetails={paymentDetails}
+            onUpdatePaymentDetails={setPaymentDetails}
+          />
+        </div>
+
+        {/* Right Column: Booking Summary & Pay CTA */}
+        <div className="payment-right-col">
+          <PaymentSummary
+            bookingData={bookingData}
+            selectedMethod={selectedMethod}
+            isProcessing={isProcessing}
+            onPayNow={handlePayNow}
+            validationError={validationError}
+          />
+        </div>
+      </div>
+
+      {/* Demo Modal when Pay Now is triggered */}
+      {isDemoModalOpen && (
+        <DemoPaymentModal
+          bookingData={bookingData}
+          selectedMethod={selectedMethod}
+          paymentDetails={paymentDetails}
+          onClose={() => setIsDemoModalOpen(false)}
+          onNavigate={onNavigate}
+        />
+      )}
+    </main>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Payment\PaymentSummary.jsx ==========
+
+export default function PaymentSummary({
+  bookingData,
+  selectedMethod,
+  isProcessing,
+  onPayNow,
+  validationError,
+}) {
+  const {
+    origin = "Kolkata",
+    destination = "Durgapur",
+    operatorName = "SBSTC Express",
+    busType = "Volvo AC Seater (2+2)",
+    departureTime = "07:30 AM",
+    date = "Today",
+    seats = ["1A", "1B"],
+    passengerCount = 2,
+    farePerSeat = 480,
+    baseFare = 960,
+    taxesAndFees = 48,
+    totalAmount = 1008,
+  } = bookingData || {};
+
+  const getMethodDisplay = () => {
+    switch (selectedMethod) {
+      case "upi":
+        return "UPI (Instant Transfer)";
+      case "card":
+        return "Credit / Debit Card";
+      case "netbanking":
+        return "Net Banking";
+      case "wallet":
+        return "Mobile Wallet";
+      default:
+        return "None Selected";
+    }
+  };
+
+  const isMethodValid = Boolean(selectedMethod);
+
+  return (
+    <aside className="payment-summary-sidebar" aria-label="Booking and Payment Summary">
+      <div className="summary-card-inner">
+        <h3 className="summary-card-title">Booking Summary</h3>
+
+        {/* Journey Details */}
+        <div className="summary-journey-box">
+          <div className="journey-route-row">
+            <span className="route-city">{origin}</span>
+            <span className="route-arrow" aria-hidden="true">â†’</span>
+            <span className="route-city">{destination}</span>
+          </div>
+
+          <div className="journey-meta-row">
+            <span className="meta-tag operator-tag">
+              <strong>{operatorName}</strong>
+            </span>
+            <span className="meta-tag bus-tag">{busType}</span>
+          </div>
+
+          <div className="journey-time-row">
+            <span className="meta-item">
+              <span className="meta-icon" aria-hidden="true">ðŸ“…</span>
+              <span>{date}</span>
+            </span>
+            <span className="meta-item">
+              <span className="meta-icon" aria-hidden="true">ðŸ•’</span>
+              <span>{departureTime}</span>
+            </span>
+          </div>
+
+          <div className="seats-info-row">
+            <span className="seats-label">Seats ({passengerCount}):</span>
+            <div className="seats-chips-wrap">
+              {seats.map((seatId) => (
+                <span key={seatId} className="seat-badge">
+                  {seatId}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Fare Breakdown */}
+        <div className="fare-breakdown-box">
+          <div className="fare-row">
+            <span>Base Fare ({passengerCount} Ã— â‚¹{farePerSeat})</span>
+            <span className="fare-value">â‚¹{baseFare}</span>
+          </div>
+
+          <div className="fare-row sub">
+            <span>Taxes & GST (5%)</span>
+            <span className="fare-value">â‚¹{taxesAndFees}</span>
+          </div>
+
+          <div className="fare-row sub">
+            <span>Convenience & Booking Fee</span>
+            <span className="free-badge">FREE</span>
+          </div>
+
+          <div className="fare-divider" />
+
+          <div className="fare-row total-row">
+            <div>
+              <span className="total-label">Total Amount</span>
+              <span className="method-indicator">Method: {getMethodDisplay()}</span>
+            </div>
+            <div className="total-amount-box">
+              <span className="total-currency">â‚¹</span>
+              <span className="total-number">{totalAmount}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Validation Warning */}
+        {validationError && (
+          <div className="payment-validation-alert" role="alert">
+            <span>âš ï¸ {validationError}</span>
+          </div>
+        )}
+
+        {/* Pay Now Button */}
+        <button
+          type="button"
+          className="pay-now-button"
+          disabled={!isMethodValid || isProcessing}
+          onClick={onPayNow}
+          aria-disabled={!isMethodValid || isProcessing}
+        >
+          {isProcessing ? (
+            <>
+              <span className="button-spinner" aria-hidden="true" />
+              <span>Simulating Payment...</span>
+            </>
+          ) : !isMethodValid ? (
+            <span>Select Payment Method Above</span>
+          ) : (
+            <>
+              <span className="btn-lock" aria-hidden="true">ðŸ”’</span>
+              <span>Pay Now â‚¹{totalAmount}</span>
+              <span className="btn-arrow" aria-hidden="true">â†’</span>
+            </>
+          )}
+        </button>
+
+        {/* Trust Badges */}
+        <div className="payment-trust-footer">
+          <div className="trust-item">
+            <span className="trust-icon" aria-hidden="true">ðŸ›¡ï¸</span>
+            <span>Frontend demo only â€¢ No real funds charged</span>
+          </div>
+          <div className="trust-item">
+            <span className="trust-icon" aria-hidden="true">âš¡</span>
+            <span>Instant booking simulation for Bengal transit</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Search\BusCard.jsx ==========
+
+export default function BusCard({ bus, onSelectBus }) {
+  const isLowSeat = bus.seatsAvailable <= 5;
+
+  const amenityIcons = {
+    wifi: { icon: "ðŸ“¶", label: "Wi-Fi" },
+    charging: { icon: "ðŸ”Œ", label: "Charging Point" },
+    water: { icon: "ðŸ’§", label: "Water" },
+    blanket: { icon: "ðŸ›Œ", label: "Blanket" },
+    reading_light: { icon: "ðŸ’¡", label: "Reading Light" },
+    cctv: { icon: "ðŸ“¹", label: "CCTV" },
+    live_tracking: { icon: "ðŸ“", label: "Live GPS" },
+  };
+
+  return (
+    <article className="bus-result-card" aria-label={`${bus.operatorName} ${bus.busType}`}>
+      {/* Top Meta Header: Operator & Rating */}
+      <div className="card-top-row">
+        <div className="operator-block">
+          <div className="operator-logo-mark" aria-hidden="true">
+            {bus.operatorName.charAt(0)}
+          </div>
+          <div>
+            <h3 className="operator-name">{bus.operatorName}</h3>
+            <p className="bus-type-desc">{bus.busType}</p>
+          </div>
+        </div>
+
+        <div className="rating-and-badges">
+          {bus.isLiveTrackable && (
+            <span className="live-gps-badge" title="Live tracking feed enabled">
+              <span className="live-gps-pulse" aria-hidden="true" />
+              Live Trackable
+            </span>
+          )}
+          <span className="operator-rating-chip" aria-label={`Rating ${bus.rating} out of 5 stars`}>
+            â˜… {bus.rating} <small>({bus.reviewsCount})</small>
+          </span>
+        </div>
+      </div>
+
+      {/* Middle Schedule Block: Departure, Journey Line, Arrival */}
+      <div className="schedule-block">
+        {/* Departure */}
+        <div className="station-col departure">
+          <span className="schedule-time">{bus.departureTime}</span>
+          <span className="city-name">{bus.originCity}</span>
+          <span className="station-point" title={bus.boardingPoint}>{bus.boardingPoint}</span>
+        </div>
+
+        {/* Travel Timeline Indicator */}
+        <div className="duration-indicator" aria-label={`Travel duration: ${bus.duration}`}>
+          <span className="duration-text">{bus.duration}</span>
+          <div className="timeline-line">
+            <span className="timeline-dot start" />
+            <span className="timeline-bus-icon" aria-hidden="true">ðŸšŒ</span>
+            <span className="timeline-dot end" />
+          </div>
+          <span className="travel-mode">Direct Service</span>
+        </div>
+
+        {/* Arrival */}
+        <div className="station-col arrival">
+          <span className="schedule-time">{bus.arrivalTime}</span>
+          <span className="city-name">{bus.destinationCity}</span>
+          <span className="station-point" title={bus.droppingPoint}>{bus.droppingPoint}</span>
+        </div>
+      </div>
+
+      {/* Amenities & Features Row */}
+      <div className="amenities-row" aria-label="Available Amenities">
+        {bus.amenities?.map((key) => {
+          const item = amenityIcons[key];
+          if (!item) return null;
+          return (
+            <span key={key} className="amenity-tag" title={item.label}>
+              <span aria-hidden="true">{item.icon}</span>
+              <span>{item.label}</span>
+            </span>
+          );
+        })}
+      </div>
+
+      {/* Bottom Footer: Price, Seats, and Selection CTA */}
+      <div className="card-footer-row">
+        <div className="seat-availability-block">
+          <span className={`seats-left-pill ${isLowSeat ? "urgency" : "plenty"}`}>
+            <span className="seat-icon" aria-hidden="true">ðŸ’º</span>
+            <strong>{bus.seatsAvailable}</strong> {bus.seatsAvailable === 1 ? "seat left" : "seats left"}
+          </span>
+          {isLowSeat && <span className="urgency-sub">Selling fast!</span>}
+        </div>
+
+        <div className="fare-and-cta-block">
+          <div className="fare-container">
+            <span className="fare-label">Starting from</span>
+            <div className="fare-amount">
+              <span className="currency">â‚¹</span>
+              <span className="price">{bus.fare}</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            className="select-seats-cta"
+            onClick={() => onSelectBus(bus)}
+            aria-label={`Select seats for ${bus.operatorName} at â‚¹${bus.fare}`}
+          >
+            <span>Select Seats</span>
+            <span className="cta-arrow" aria-hidden="true">â†’</span>
+          </button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Search\EmptyState.jsx ==========
+
+export default function EmptyState({ onResetFilters, origin, destination }) {
+  return (
+    <div className="empty-results-card" role="status">
+      <div className="empty-icon-circle" aria-hidden="true">
+        ðŸšŒ
+      </div>
+      <h3>No Bus Schedules Found</h3>
+      <p className="empty-description">
+        No bus services match your selected filters for{" "}
+        <strong>{origin} â†’ {destination}</strong>.
+      </p>
+
+      <div className="empty-suggestions">
+        <p className="suggestions-title">Try adjusting your search:</p>
+        <ul>
+          <li>Relax your departure time or price limits</li>
+          <li>Clear selected amenities or bus type filters</li>
+          <li>Check that origin and destination cities are different</li>
+        </ul>
+      </div>
+
+      <button
+        type="button"
+        className="reset-all-filters-btn"
+        onClick={onResetFilters}
+      >
+        Clear All Filters & Show All Buses
+      </button>
+    </div>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Search\ErrorState.jsx ==========
+
+export default function ErrorState({ errorMessage, onRetry }) {
+  return (
+    <div className="error-results-card" role="alert">
+      <div className="error-icon-circle" aria-hidden="true">
+        âš ï¸
+      </div>
+      <h3>Search Failed</h3>
+      <p className="error-description">
+        {errorMessage || "We encountered an error loading bus schedules. Please try again."}
+      </p>
+
+      <button
+        type="button"
+        className="retry-search-btn"
+        onClick={onRetry}
+      >
+        <span aria-hidden="true">ðŸ”„</span>
+        <span>Retry Search</span>
+      </button>
+    </div>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Search\FilterPanel.jsx ==========
+
+export default function FilterPanel({
+  filters,
+  onFilterChange,
+  onResetFilters,
+  totalResultsCount,
+  filteredCount,
+}) {
+  const activeFiltersCount =
+    (filters.departureTimes?.length || 0) +
+    (filters.busTypes?.length || 0) +
+    (filters.amenities?.length || 0) +
+    (filters.maxPrice < 700 ? 1 : 0);
+
+  const toggleArrayItem = (key, value) => {
+    const current = filters[key] || [];
+    const next = current.includes(value)
+      ? current.filter((item) => item !== value)
+      : [...current, value];
+    onFilterChange({ ...filters, [key]: next });
+  };
+
+  return (
+    <aside className="filters-card" aria-label="Search Filters">
+      <div className="filters-header">
+        <div className="filters-title-row">
+          <span className="filter-icon" aria-hidden="true">âš™ï¸</span>
+          <h3>Filters</h3>
+          {activeFiltersCount > 0 && (
+            <span className="active-filter-badge">{activeFiltersCount}</span>
+          )}
+        </div>
+
+        {activeFiltersCount > 0 && (
+          <button
+            type="button"
+            className="reset-filters-btn"
+            onClick={onResetFilters}
+          >
+            Clear All
+          </button>
+        )}
+      </div>
+
+      <div className="filter-summary-info">
+        Showing <strong>{filteredCount}</strong> of <strong>{totalResultsCount}</strong> buses
+      </div>
+
+      {/* 1. Departure Time */}
+      <section className="filter-group">
+        <h4 className="filter-group-title">Departure Time</h4>
+        <div className="time-chips-grid">
+          <button
+            type="button"
+            className={`time-chip-btn ${filters.departureTimes?.includes("morning") ? "selected" : ""}`}
+            onClick={() => toggleArrayItem("departureTimes", "morning")}
+            aria-pressed={filters.departureTimes?.includes("morning")}
+          >
+            <span className="time-icon">ðŸŒ…</span>
+            <span className="time-label">Morning</span>
+            <span className="time-sub">06:00 - 12:00</span>
+          </button>
+
+          <button
+            type="button"
+            className={`time-chip-btn ${filters.departureTimes?.includes("afternoon") ? "selected" : ""}`}
+            onClick={() => toggleArrayItem("departureTimes", "afternoon")}
+            aria-pressed={filters.departureTimes?.includes("afternoon")}
+          >
+            <span className="time-icon">â˜€ï¸</span>
+            <span className="time-label">Afternoon</span>
+            <span className="time-sub">12:00 - 18:00</span>
+          </button>
+
+          <button
+            type="button"
+            className={`time-chip-btn ${filters.departureTimes?.includes("evening") ? "selected" : ""}`}
+            onClick={() => toggleArrayItem("departureTimes", "evening")}
+            aria-pressed={filters.departureTimes?.includes("evening")}
+          >
+            <span className="time-icon">ðŸŒ™</span>
+            <span className="time-label">Evening / Night</span>
+            <span className="time-sub">18:00 - 06:00</span>
+          </button>
+        </div>
+      </section>
+
+      {/* 2. Bus Type */}
+      <section className="filter-group">
+        <h4 className="filter-group-title">Bus Type & Class</h4>
+        <div className="checkbox-list">
+          <label className="clay-checkbox-label">
+            <input
+              type="checkbox"
+              checked={filters.busTypes?.includes("ac") || false}
+              onChange={() => toggleArrayItem("busTypes", "ac")}
+            />
+            <span className="clay-checkbox-custom" />
+            <span className="checkbox-text">AC Coaches</span>
+          </label>
+
+          <label className="clay-checkbox-label">
+            <input
+              type="checkbox"
+              checked={filters.busTypes?.includes("non_ac") || false}
+              onChange={() => toggleArrayItem("busTypes", "non_ac")}
+            />
+            <span className="clay-checkbox-custom" />
+            <span className="checkbox-text">Non-AC Express</span>
+          </label>
+
+          <label className="clay-checkbox-label">
+            <input
+              type="checkbox"
+              checked={filters.busTypes?.includes("sleeper") || false}
+              onChange={() => toggleArrayItem("busTypes", "sleeper")}
+            />
+            <span className="clay-checkbox-custom" />
+            <span className="checkbox-text">Sleeper / Semi-Sleeper</span>
+          </label>
+
+          <label className="clay-checkbox-label">
+            <input
+              type="checkbox"
+              checked={filters.busTypes?.includes("seater") || false}
+              onChange={() => toggleArrayItem("busTypes", "seater")}
+            />
+            <span className="clay-checkbox-custom" />
+            <span className="checkbox-text">Seater</span>
+          </label>
+        </div>
+      </section>
+
+      {/* 3. Price Filter */}
+      <section className="filter-group">
+        <div className="price-header-row">
+          <h4 className="filter-group-title">Maximum Fare</h4>
+          <span className="price-value-badge">â‚¹{filters.maxPrice}</span>
+        </div>
+        <div className="price-slider-container">
+          <input
+            type="range"
+            min={180}
+            max={700}
+            step={20}
+            value={filters.maxPrice}
+            onChange={(e) =>
+              onFilterChange({ ...filters, maxPrice: Number(e.target.value) })
+            }
+            className="clay-range-slider"
+            aria-label="Filter by maximum fare"
+          />
+          <div className="price-limits">
+            <span>â‚¹180</span>
+            <span>â‚¹700</span>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Amenities */}
+      <section className="filter-group">
+        <h4 className="filter-group-title">Amenities</h4>
+        <div className="checkbox-list">
+          <label className="clay-checkbox-label">
+            <input
+              type="checkbox"
+              checked={filters.amenities?.includes("wifi") || false}
+              onChange={() => toggleArrayItem("amenities", "wifi")}
+            />
+            <span className="clay-checkbox-custom" />
+            <span className="checkbox-text">ðŸ“¶ Free Wi-Fi</span>
+          </label>
+
+          <label className="clay-checkbox-label">
+            <input
+              type="checkbox"
+              checked={filters.amenities?.includes("charging") || false}
+              onChange={() => toggleArrayItem("amenities", "charging")}
+            />
+            <span className="clay-checkbox-custom" />
+            <span className="checkbox-text">ðŸ”Œ Charging Point</span>
+          </label>
+
+          <label className="clay-checkbox-label">
+            <input
+              type="checkbox"
+              checked={filters.amenities?.includes("water") || false}
+              onChange={() => toggleArrayItem("amenities", "water")}
+            />
+            <span className="clay-checkbox-custom" />
+            <span className="checkbox-text">ðŸ’§ Mineral Water</span>
+          </label>
+
+          <label className="clay-checkbox-label">
+            <input
+              type="checkbox"
+              checked={filters.amenities?.includes("blanket") || false}
+              onChange={() => toggleArrayItem("amenities", "blanket")}
+            />
+            <span className="clay-checkbox-custom" />
+            <span className="checkbox-text">ðŸ›Œ Blanket / Linen</span>
+          </label>
+
+          <label className="clay-checkbox-label">
+            <input
+              type="checkbox"
+              checked={filters.amenities?.includes("live_tracking") || false}
+              onChange={() => toggleArrayItem("amenities", "live_tracking")}
+            />
+            <span className="clay-checkbox-custom" />
+            <span className="checkbox-text">ðŸ“ Live GPS Tracking</span>
+          </label>
+        </div>
+      </section>
+    </aside>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Search\LoadingSkeleton.jsx ==========
+
+export default function LoadingSkeleton() {
+  return (
+    <div className="skeleton-container" aria-label="Loading bus schedules" role="status">
+      {[1, 2, 3].map((idx) => (
+        <div key={idx} className="skeleton-card">
+          <div className="skeleton-row header-skeleton">
+            <div className="skeleton-box logo-skeleton" />
+            <div className="skeleton-lines">
+              <div className="skeleton-line title-line" />
+              <div className="skeleton-line sub-line" />
+            </div>
+            <div className="skeleton-box rating-skeleton" />
+          </div>
+
+          <div className="skeleton-row schedule-skeleton">
+            <div className="skeleton-col">
+              <div className="skeleton-line time-line" />
+              <div className="skeleton-line text-line" />
+            </div>
+            <div className="skeleton-timeline">
+              <div className="skeleton-line duration-line" />
+              <div className="skeleton-bar" />
+            </div>
+            <div className="skeleton-col">
+              <div className="skeleton-line time-line" />
+              <div className="skeleton-line text-line" />
+            </div>
+          </div>
+
+          <div className="skeleton-row footer-skeleton">
+            <div className="skeleton-box badge-skeleton" />
+            <div className="skeleton-box price-skeleton" />
+            <div className="skeleton-box btn-skeleton" />
+          </div>
+        </div>
+      ))}
+      <span className="sr-only">Finding available bus schedules...</span>
+    </div>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Search\MobileFilterDrawer.jsx ==========
+
+import FilterPanel from "./FilterPanel";
+
+export default function MobileFilterDrawer({
+  isOpen,
+  onClose,
+  filters,
+  onFilterChange,
+  onResetFilters,
+  totalResultsCount,
+  filteredCount,
+}) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="mobile-drawer-backdrop" onClick={onClose} role="presentation">
+      <div
+        className="mobile-drawer-sheet"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Filter Options"
+      >
+        <div className="drawer-handle-bar" aria-hidden="true">
+          <span className="drawer-handle" />
+        </div>
+
+        <div className="drawer-header">
+          <h3>Filter Bus Results</h3>
+          <button
+            type="button"
+            className="drawer-close-btn"
+            onClick={onClose}
+            aria-label="Close filters"
+          >
+            âœ•
+          </button>
+        </div>
+
+        <div className="drawer-content">
+          <FilterPanel
+            filters={filters}
+            onFilterChange={onFilterChange}
+            onResetFilters={onResetFilters}
+            totalResultsCount={totalResultsCount}
+            filteredCount={filteredCount}
+          />
+        </div>
+
+        <div className="drawer-footer">
+          <button
+            type="button"
+            className="drawer-apply-btn"
+            onClick={onClose}
+          >
+            Show {filteredCount} {filteredCount === 1 ? "Bus" : "Buses"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Search\SearchHeader.jsx ==========
+
+import { useState } from "react";
+
+export default function SearchHeader({
+  searchParams,
+  onSearchSubmit,
+  isSearching,
+}) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [from, setFrom] = useState(searchParams.from);
+  const [to, setTo] = useState(searchParams.to);
+  const [date, setDate] = useState(searchParams.date);
+  const [passengers, setPassengers] = useState(searchParams.passengers || 1);
+  const [validationError, setValidationError] = useState("");
+
+  const handleSwap = () => {
+    setFrom(to);
+    setTo(from);
+  };
+
+  const handleDateShortcut = (daysFromToday) => {
+    const target = new Date();
+    target.setDate(target.getDate() + daysFromToday);
+    const dateStr = target.toISOString().split("T")[0];
+    setDate(dateStr);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!from.trim() || !to.trim()) {
+      setValidationError("Please enter both origin and destination cities.");
+      return;
+    }
+    setValidationError("");
+    onSearchSubmit({
+      from: from.trim(),
+      to: to.trim(),
+      date,
+      passengers: Number(passengers),
+    });
+    setIsExpanded(false);
+  };
+
+  // Format display date
+  const formatDateDisplay = (dateString) => {
+    if (!dateString) return "Today";
+    try {
+      const d = new Date(dateString + "T00:00:00");
+      return d.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  return (
+    <section className="search-header-container" aria-label="Journey Search Bar">
+      {/* Top Banner: Journey Summary Pill */}
+      <div className="journey-summary-bar">
+        <div className="summary-route">
+          <span className="route-city">{searchParams.from}</span>
+          <span className="route-arrow" aria-hidden="true">â†’</span>
+          <span className="route-city">{searchParams.to}</span>
+        </div>
+
+        <div className="summary-meta">
+          <span className="meta-item">
+            <span className="meta-icon" aria-hidden="true">ðŸ“…</span>
+            <span>{formatDateDisplay(searchParams.date)}</span>
+          </span>
+          <span className="meta-item">
+            <span className="meta-icon" aria-hidden="true">ðŸ‘¥</span>
+            <span>{searchParams.passengers} {searchParams.passengers === 1 ? "Passenger" : "Passengers"}</span>
+          </span>
+        </div>
+
+        <button
+          type="button"
+          className="modify-search-btn"
+          onClick={() => setIsExpanded((prev) => !prev)}
+          aria-expanded={isExpanded}
+        >
+          <span>{isExpanded ? "Close" : "Modify Search"}</span>
+          <span className="btn-chevron" aria-hidden="true">{isExpanded ? "â–²" : "â–¼"}</span>
+        </button>
+      </div>
+
+      {/* Development Fixture Notice */}
+      <div className="demo-notice-pill" role="status">
+        <span className="notice-badge">DEMO FIXTURE</span>
+        <span>Schedules and seat counts below are development fixtures for UI demonstration.</span>
+      </div>
+
+      {/* Expandable / In-place Edit Form */}
+      {isExpanded && (
+        <form className="search-edit-card" onSubmit={handleSubmit} noValidate>
+          <div className="edit-form-grid">
+            {/* Origin */}
+            <label className="edit-input-field">
+              <span className="field-label">From (Origin)</span>
+              <div className="field-input-box">
+                <span className="input-icon" aria-hidden="true">ðŸ“</span>
+                <input
+                  type="text"
+                  value={from}
+                  onChange={(e) => setFrom(e.target.value)}
+                  placeholder="e.g. Kolkata, Howrah"
+                  required
+                />
+              </div>
+            </label>
+
+            {/* Swap Button */}
+            <div className="swap-btn-container">
+              <button
+                type="button"
+                className="swap-cities-btn"
+                onClick={handleSwap}
+                title="Swap origin and destination"
+                aria-label="Swap origin and destination"
+              >
+                <span aria-hidden="true">â‡„</span>
+              </button>
+            </div>
+
+            {/* Destination */}
+            <label className="edit-input-field">
+              <span className="field-label">To (Destination)</span>
+              <div className="field-input-box">
+                <span className="input-icon" aria-hidden="true">ðŸ</span>
+                <input
+                  type="text"
+                  value={to}
+                  onChange={(e) => setTo(e.target.value)}
+                  placeholder="e.g. Durgapur, Siliguri"
+                  required
+                />
+              </div>
+            </label>
+
+            {/* Journey Date */}
+            <label className="edit-input-field">
+              <span className="field-label">Journey Date</span>
+              <div className="field-input-box">
+                <span className="input-icon" aria-hidden="true">ðŸ“…</span>
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  required
+                />
+              </div>
+            </label>
+
+            {/* Passengers */}
+            <label className="edit-input-field">
+              <span className="field-label">Passengers</span>
+              <div className="field-input-box">
+                <span className="input-icon" aria-hidden="true">ðŸ‘¥</span>
+                <select
+                  value={passengers}
+                  onChange={(e) => setPassengers(Number(e.target.value))}
+                >
+                  <option value={1}>1 Passenger</option>
+                  <option value={2}>2 Passengers</option>
+                  <option value={3}>3 Passengers</option>
+                  <option value={4}>4 Passengers</option>
+                  <option value={5}>5 Passengers</option>
+                  <option value={6}>6 Passengers</option>
+                </select>
+              </div>
+            </label>
+          </div>
+
+          {/* Quick Date Shortcuts */}
+          <div className="date-shortcuts-row">
+            <span className="shortcuts-label">Quick select:</span>
+            <button
+              type="button"
+              className="date-chip"
+              onClick={() => handleDateShortcut(0)}
+            >
+              Today
+            </button>
+            <button
+              type="button"
+              className="date-chip"
+              onClick={() => handleDateShortcut(1)}
+            >
+              Tomorrow
+            </button>
+            <button
+              type="button"
+              className="date-chip"
+              onClick={() => handleDateShortcut(2)}
+            >
+              Day after
+            </button>
+          </div>
+
+          {validationError && (
+            <p className="search-validation-error" role="alert">
+              âš ï¸ {validationError}
+            </p>
+          )}
+
+          <div className="edit-actions">
+            <button
+              type="button"
+              className="cancel-btn"
+              onClick={() => setIsExpanded(false)}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="update-search-btn"
+              disabled={isSearching}
+            >
+              {isSearching ? "Searching..." : "Update Search â†’"}
+            </button>
+          </div>
+        </form>
+      )}
+    </section>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Search\SearchResultsPage.jsx ==========
+
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { searchBuses } from "../../services/searchService";
+import SearchHeader from "./SearchHeader";
+import FilterPanel from "./FilterPanel";
+import SortBar from "./SortBar";
+import BusCard from "./BusCard";
+import LoadingSkeleton from "./LoadingSkeleton";
+import EmptyState from "./EmptyState";
+import ErrorState from "./ErrorState";
+import SeatSelectionModal from "./SeatSelectionModal";
+import MobileFilterDrawer from "./MobileFilterDrawer";
+import "./SearchResults.css";
+
+const DEFAULT_FILTERS = {
+  departureTimes: [],
+  busTypes: [],
+  amenities: [],
+  maxPrice: 700,
+};
+
+export default function SearchResultsPage({ initialQuery, onNavigate }) {
+  const [searchParams, setSearchParams] = useState(() => {
+    return {
+      from: initialQuery?.from || "Kolkata",
+      to: initialQuery?.to || "Durgapur",
+      date: initialQuery?.date || new Date().toISOString().split("T")[0],
+      passengers: Number(initialQuery?.passengers) || 1,
+    };
+  });
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [rawResults, setRawResults] = useState([]);
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [sortBy, setSortBy] = useState("departure_asc");
+  const [selectedBus, setSelectedBus] = useState(null);
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [simulateErrorNext, setSimulateErrorNext] = useState(false);
+
+  // Fetch bus schedules
+  const performSearch = useCallback(async (params, triggerError = false) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await searchBuses({
+        ...params,
+        simulateError: triggerError,
+      });
+      setRawResults(data.results || []);
+    } catch (err) {
+      setError(err.message || "Failed to load bus schedules.");
+      setRawResults([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    performSearch(searchParams, simulateErrorNext);
+  }, [searchParams, performSearch, simulateErrorNext]);
+
+  // Handle search bar modification
+  const handleSearchSubmit = (newParams) => {
+    setSearchParams(newParams);
+    setFilters(DEFAULT_FILTERS); // Reset filters on new city search
+  };
+
+  // Filter logic
+  const filteredBuses = useMemo(() => {
+    return rawResults.filter((bus) => {
+      // 1. Max price
+      if (bus.fare > filters.maxPrice) {
+        return false;
+      }
+
+      // 2. Departure time slot
+      if (filters.departureTimes.length > 0) {
+        const hour = parseInt(bus.departureTime.split(":")[0], 10);
+        const matchesTime = filters.departureTimes.some((slot) => {
+          if (slot === "morning") return hour >= 6 && hour < 12;
+          if (slot === "afternoon") return hour >= 12 && hour < 18;
+          if (slot === "evening") return hour >= 18 || hour < 6;
+          return true;
+        });
+        if (!matchesTime) return false;
+      }
+
+      // 3. Bus type
+      if (filters.busTypes.length > 0) {
+        const matchesType = filters.busTypes.some((type) => {
+          if (type === "ac") return bus.isAc === true;
+          if (type === "non_ac") return bus.isAc === false;
+          if (type === "sleeper") return bus.category === "sleeper" || bus.category === "semi_sleeper";
+          if (type === "seater") return bus.category === "seater";
+          return true;
+        });
+        if (!matchesType) return false;
+      }
+
+      // 4. Amenities
+      if (filters.amenities.length > 0) {
+        const hasAllAmenities = filters.amenities.every((amenity) =>
+          bus.amenities?.includes(amenity)
+        );
+        if (!hasAllAmenities) return false;
+      }
+
+      return true;
+    });
+  }, [rawResults, filters]);
+
+  // Sort logic
+  const sortedBuses = useMemo(() => {
+    const list = [...filteredBuses];
+    switch (sortBy) {
+      case "departure_asc":
+        return list.sort((a, b) => a.departureTime.localeCompare(b.departureTime));
+      case "fare_asc":
+        return list.sort((a, b) => a.fare - b.fare);
+      case "duration_asc":
+        return list.sort((a, b) => a.durationMinutes - b.durationMinutes);
+      case "seats_desc":
+        return list.sort((a, b) => b.seatsAvailable - a.seatsAvailable);
+      default:
+        return list;
+    }
+  }, [filteredBuses, sortBy]);
+
+  const activeFiltersCount =
+    (filters.departureTimes.length || 0) +
+    (filters.busTypes.length || 0) +
+    (filters.amenities.length || 0) +
+    (filters.maxPrice < 700 ? 1 : 0);
+
+  return (
+    <main className="search-page-layout">
+      {/* Search Header Banner & Edit Form */}
+      <SearchHeader
+        searchParams={searchParams}
+        onSearchSubmit={handleSearchSubmit}
+        isSearching={isLoading}
+      />
+
+      {/* Main Content: Left Filter Sidebar + Right Results Area */}
+      <div className="search-grid-layout">
+        {/* Desktop / Tablet Sidebar */}
+        <div className="search-sidebar-wrapper">
+          <FilterPanel
+            filters={filters}
+            onFilterChange={setFilters}
+            onResetFilters={() => setFilters(DEFAULT_FILTERS)}
+            totalResultsCount={rawResults.length}
+            filteredCount={filteredBuses.length}
+          />
+
+          {/* Test State Simulator Box */}
+          <div className="test-helpers-card">
+            <span className="test-helpers-title">ðŸ§ª UI State Simulation</span>
+            <div className="test-buttons-row">
+              <button
+                type="button"
+                className="test-state-btn"
+                onClick={() => performSearch(searchParams, false)}
+                title="Reload search fixtures"
+              >
+                Reload
+              </button>
+              <button
+                type="button"
+                className="test-state-btn"
+                onClick={() => {
+                  setSimulateErrorNext(true);
+                  performSearch(searchParams, true);
+                }}
+                title="Simulate network error state"
+              >
+                Simulate Error
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Results Area */}
+        <section className="search-results-area" aria-label="Available Bus List">
+          {/* Sort Controls Bar */}
+          <SortBar
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+            resultsCount={sortedBuses.length}
+            onOpenMobileFilters={() => setIsMobileFilterOpen(true)}
+            activeFiltersCount={activeFiltersCount}
+          />
+
+          {/* Dynamic Content States */}
+          {isLoading ? (
+            <LoadingSkeleton />
+          ) : error ? (
+            <ErrorState
+              errorMessage={error}
+              onRetry={() => {
+                setSimulateErrorNext(false);
+                performSearch(searchParams, false);
+              }}
+            />
+          ) : sortedBuses.length === 0 ? (
+            <EmptyState
+              origin={searchParams.from}
+              destination={searchParams.to}
+              onResetFilters={() => setFilters(DEFAULT_FILTERS)}
+            />
+          ) : (
+            <div className="bus-cards-list">
+              {sortedBuses.map((bus) => (
+                <BusCard
+                  key={bus.id}
+                  bus={bus}
+                  onSelectBus={(selected) => {
+                    if (onNavigate) {
+                      onNavigate("seats", { tripId: selected.id });
+                    } else {
+                      window.location.hash = `/trips/${selected.id}/seats`;
+                    }
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+
+      {/* Mobile Filter Slide Drawer */}
+      <MobileFilterDrawer
+        isOpen={isMobileFilterOpen}
+        onClose={() => setIsMobileFilterOpen(false)}
+        filters={filters}
+        onFilterChange={setFilters}
+        onResetFilters={() => setFilters(DEFAULT_FILTERS)}
+        totalResultsCount={rawResults.length}
+        filteredCount={filteredBuses.length}
+      />
+
+      {/* Seat Selection Modal */}
+      {selectedBus && (
+        <SeatSelectionModal
+          selectedBus={selectedBus}
+          searchParams={searchParams}
+          onClose={() => setSelectedBus(null)}
+          onNavigate={onNavigate}
+        />
+      )}
+    </main>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Search\SeatSelectionModal.jsx ==========
+
+export default function SeatSelectionModal({
+  selectedBus,
+  onClose,
+  searchParams,
+  onNavigate,
+}) {
+  if (!selectedBus) return null;
+
+  return (
+    <div className="modal-backdrop" onClick={onClose} role="presentation">
+      <div
+        className="seat-modal-card"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+      >
+        <div className="modal-header">
+          <div className="modal-title-row">
+            <span className="modal-bus-icon" aria-hidden="true">ðŸšŒ</span>
+            <div>
+              <h3 id="modal-title">Ready for Seat Selection</h3>
+              <p className="modal-subtitle">{selectedBus.operatorName} â€” {selectedBus.busType}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="modal-close-btn"
+            onClick={onClose}
+            aria-label="Close dialog"
+          >
+            âœ•
+          </button>
+        </div>
+
+        <div className="modal-body">
+          <div className="selection-summary-box">
+            <div className="summary-item">
+              <span className="summary-label">Route</span>
+              <span className="summary-value">
+                {selectedBus.originCity} â†’ {selectedBus.destinationCity}
+              </span>
+            </div>
+            <div className="summary-item">
+              <span className="summary-label">Departure</span>
+              <span className="summary-value">
+                {selectedBus.departureTime} (Est. Arrival: {selectedBus.arrivalTime})
+              </span>
+            </div>
+            <div className="summary-item">
+              <span className="summary-label">Passengers</span>
+              <span className="summary-value">
+                {searchParams.passengers || 1} Person
+              </span>
+            </div>
+            <div className="summary-item">
+              <span className="summary-label">Base Fare</span>
+              <span className="summary-value fare-highlight">
+                â‚¹{selectedBus.fare} <small>per seat</small>
+              </span>
+            </div>
+          </div>
+
+          <div className="phase-notice-box">
+            <span className="phase-pill">PHASE 2 MILESTONE</span>
+            <p>
+              Bus selection is confirmed for <strong>{selectedBus.busNumber}</strong>. 
+              The interactive seat layout and passenger booking flow will be integrated in Phase 3.
+            </p>
+          </div>
+        </div>
+
+        <div className="modal-footer">
+          <button
+            type="button"
+            className="modal-secondary-btn"
+            onClick={onClose}
+          >
+            Choose Another Bus
+          </button>
+          <button
+            type="button"
+            className="modal-primary-btn"
+            onClick={() => {
+              onClose();
+              if (onNavigate) {
+                onNavigate("seats", { tripId: selectedBus.id });
+              } else {
+                window.location.hash = `/trips/${selectedBus.id}/seats`;
+              }
+            }}
+          >
+            Select Seats on this Bus â†’
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Search\SortBar.jsx ==========
+
+export default function SortBar({
+  sortBy,
+  onSortChange,
+  resultsCount,
+  onOpenMobileFilters,
+  activeFiltersCount,
+}) {
+  const sortOptions = [
+    { id: "departure_asc", label: "Earliest Departure", icon: "ðŸ•’" },
+    { id: "fare_asc", label: "Lowest Fare", icon: "ðŸ·ï¸" },
+    { id: "duration_asc", label: "Fastest Duration", icon: "âš¡" },
+    { id: "seats_desc", label: "Most Seats", icon: "ðŸ’º" },
+  ];
+
+  return (
+    <div className="sort-bar-container" aria-label="Sort and Results Count">
+      <div className="results-count-badge">
+        <span className="count-number">{resultsCount}</span>
+        <span className="count-text">{resultsCount === 1 ? "Bus Found" : "Buses Available"}</span>
+      </div>
+
+      {/* Mobile filter open trigger */}
+      <button
+        type="button"
+        className="mobile-filter-trigger"
+        onClick={onOpenMobileFilters}
+        aria-label="Open filter options"
+      >
+        <span aria-hidden="true">âš™ï¸</span>
+        <span>Filter Buses</span>
+        {activeFiltersCount > 0 && (
+          <span className="mobile-filter-count">{activeFiltersCount}</span>
+        )}
+      </button>
+
+      {/* Desktop & Tablet Sort Pills */}
+      <div className="sort-pills-group" role="tablist" aria-label="Sort results by">
+        <span className="sort-label">Sort By:</span>
+        {sortOptions.map((opt) => (
+          <button
+            key={opt.id}
+            type="button"
+            className={`sort-pill ${sortBy === opt.id ? "active" : ""}`}
+            onClick={() => onSortChange(opt.id)}
+            role="tab"
+            aria-selected={sortBy === opt.id}
+          >
+            <span className="sort-pill-icon" aria-hidden="true">{opt.icon}</span>
+            <span>{opt.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Seats\SeatItem.jsx ==========
+
+export default function SeatItem({
+  seat,
+  isSelected,
+  onToggle,
+  disabled,
+}) {
+  const isBooked = seat.isUnavailable;
+
+  const handleClick = () => {
+    if (isBooked || disabled) return;
+    onToggle(seat);
+  };
+
+  const getAriaLabel = () => {
+    if (isBooked) return `Seat ${seat.id}, ${seat.type}, Unavailable`;
+    if (isSelected) return `Seat ${seat.id}, ${seat.type}, Selected`;
+    return `Seat ${seat.id}, ${seat.type}, Available`;
+  };
+
+  return (
+    <button
+      type="button"
+      className={`clay-seat-btn ${
+        isBooked ? "seat-unavailable" : isSelected ? "seat-selected" : "seat-available"
+      }`}
+      onClick={handleClick}
+      disabled={isBooked}
+      aria-pressed={isSelected}
+      aria-label={getAriaLabel()}
+      title={
+        isBooked
+          ? `Seat ${seat.id} (${seat.type}) - Booked`
+          : `Seat ${seat.id} (${seat.type}) - Click to select`
+      }
+    >
+      <span className="seat-headrest" aria-hidden="true" />
+      <span className="seat-id">{seat.id}</span>
+      {isSelected && <span className="seat-check" aria-hidden="true">âœ“</span>}
+      {isBooked && <span className="seat-booked-cross" aria-hidden="true">âœ•</span>}
+    </button>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Seats\SeatLayout.jsx ==========
+
+import SeatItem from "./SeatItem";
+
+export default function SeatLayout({
+  seatLayout,
+  selectedSeats,
+  onToggleSeat,
+  isMaxReached,
+}) {
+  const { rows, seats } = seatLayout;
+
+  // Group seats by row
+  const rowList = [];
+  for (let r = 1; r <= rows; r++) {
+    const rowSeats = seats.filter((s) => s.row === r);
+    rowList.push({
+      rowNumber: r,
+      leftSeats: rowSeats.filter((s) => s.side === "left"),
+      rightSeats: rowSeats.filter((s) => s.side === "right"),
+    });
+  }
+
+  return (
+    <div className="bus-deck-card" aria-label="Bus Seating Layout">
+      {/* Legend Banner */}
+      <div className="seat-legend-row" aria-label="Seat Legend">
+        <div className="legend-item">
+          <span className="legend-badge legend-available" aria-hidden="true" />
+          <span>Available</span>
+        </div>
+        <div className="legend-item">
+          <span className="legend-badge legend-selected" aria-hidden="true">âœ“</span>
+          <span>Selected</span>
+        </div>
+        <div className="legend-item">
+          <span className="legend-badge legend-unavailable" aria-hidden="true">âœ•</span>
+          <span>Unavailable</span>
+        </div>
+      </div>
+
+      {/* Bus Chassis Container */}
+      <div className="bus-chassis">
+        {/* Front of bus: Driver Cabin & Door */}
+        <div className="bus-front-cabin">
+          <div className="entry-door" title="Passenger Entry Door">
+            <span className="door-text">ENTRY DOOR</span>
+            <span className="door-icon" aria-hidden="true">ðŸšª</span>
+          </div>
+
+          <div className="driver-area" title="Driver Cabin">
+            <span className="driver-label">DRIVER</span>
+            <span className="steering-wheel" aria-hidden="true">ðŸ›ž</span>
+          </div>
+        </div>
+
+        <div className="cabin-divider" aria-hidden="true" />
+
+        {/* Rows of seats */}
+        <div className="seats-grid-body">
+          {rowList.map(({ rowNumber, leftSeats, rightSeats }) => (
+            <div key={rowNumber} className="bus-seat-row">
+              {/* Left pair (Window A, Aisle B) */}
+              <div className="seat-pair left-pair">
+                {leftSeats.map((seat) => (
+                  <SeatItem
+                    key={seat.id}
+                    seat={seat}
+                    isSelected={selectedSeats.some((s) => s.id === seat.id)}
+                    onToggle={onToggleSeat}
+                    disabled={isMaxReached && !selectedSeats.some((s) => s.id === seat.id)}
+                  />
+                ))}
+              </div>
+
+              {/* Center Aisle */}
+              <div className="bus-aisle" aria-hidden="true">
+                <span className="row-num">{rowNumber}</span>
+              </div>
+
+              {/* Right pair (Aisle C, Window D) */}
+              <div className="seat-pair right-pair">
+                {rightSeats.map((seat) => (
+                  <SeatItem
+                    key={seat.id}
+                    seat={seat}
+                    isSelected={selectedSeats.some((s) => s.id === seat.id)}
+                    onToggle={onToggleSeat}
+                    disabled={isMaxReached && !selectedSeats.some((s) => s.id === seat.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Rear of bus */}
+        <div className="bus-rear-bumper">
+          <span>REAR OF BUS</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+========== FILE: C:\Users\arnab\OneDrive\Desktop\busbondhu\frontend\src\components\Seats\SeatSelectionPage.jsx ==========
+
+import { useState, useMemo } from "react";
+import { getBusSeatLayout, MAX_SEATS_PER_BOOKING, SEAT_FIXTURE_NOTICE } from "../../services/seatService";
+import SeatLayout from "./SeatLayout";
+import "./Seats.css";
+
+export default function SeatSelectionPage({ tripId, onNavigate }) {
+  const [selectedSeats, setSelectedSeats] = useState([]);
+  const [bookingNotice, setBookingNotice] = useState("");
+  const [isCompletedModalOpen, setIsCompletedModalOpen] = useState(false);
+
+  // Load deterministic seat map for this trip
+  const seatLayout = useMemo(() => getBusSeatLayout(tripId), [tripId]);
+
+  // Trip details (derived from tripId or demo fallback)
+  const tripDetails = useMemo(() => {
+    // Extract operator or use default
+    return {
+      tripId: tripId || "BB-101",
+      operatorName: tripId?.includes("ROYAL") ? "Royal Cruiser" : tripId?.includes("SHYAM") ? "Shyamoli Paribahan" : "SBSTC Express",
+      busType: "Volvo AC Seater (2+2)",
+      origin: "Kolkata (Esplanade)",
+      destination: "Durgapur (City Centre)",
+      departureTime: "07:30 AM",
+      arrivalTime: "11:15 AM",
+      duration: "3h 45m",
+      baseFare: 480,
+    };
+  }, [tripId]);
+
+  const isMaxReached = selectedSeats.length >= MAX_SEATS_PER_BOOKING;
+
+  // Toggle seat selection
+  const handleToggleSeat = (seat) => {
+    setBookingNotice("");
+    const alreadySelected = selectedSeats.some((s) => s.id === seat.id);
+
+    if (alreadySelected) {
+      setSelectedSeats((prev) => prev.filter((s) => s.id !== seat.id));
+    } else {
+      if (selectedSeats.length >= MAX_SEATS_PER_BOOKING) {
+        setBookingNotice(`You can select a maximum of ${MAX_SEATS_PER_BOOKING} seats per journey.`);
+        return;
+      }
+      setSelectedSeats((prev) => [...prev, seat]);
+    }
+  };
+
+  const handleRemoveSeat = (seatId) => {
+    setSelectedSeats((prev) => prev.filter((s) => s.id !== seatId));
+    setBookingNotice("");
+  };
+
+  const totalFare = selectedSeats.length * tripDetails.baseFare;
+
+  const handleContinue = () => {
+    if (selectedSeats.length === 0) return;
+    const bookingPayload = {
+      tripId: tripDetails.tripId,
+      operatorName: tripDetails.operatorName,
+      busType: tripDetails.busType,
+      origin: tripDetails.origin,
+      destination: tripDetails.destination,
+      departureTime: tripDetails.departureTime,
+      arrivalTime: tripDetails.arrivalTime,
+      duration: tripDetails.duration,
+      date: new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }),
+      seats: selectedSeats.map((s) => s.id),
+      passengerCount: selectedSeats.length,
+      farePerSeat: tripDetails.baseFare,
+      baseFare: totalFare,
+      taxesAndFees: Math.round(totalFare * 0.05),
+      totalAmount: totalFare + Math.round(totalFare * 0.05),
+    };
+    if (onNavigate) {
+      onNavigate("passengers", bookingPayload);
+    } else {
+      setIsCompletedModalOpen(true);
+    }
+  };
+
+  return (
+    <main className="seat-page-container">
+      {/* Top Header: Back navigation & Trip Information */}
+      <div className="seat-page-header">
+        <button
+          type="button"
+          className="back-to-results-btn"
+          onClick={() => onNavigate("search")}
+          aria-label="Back to search results"
+        >
+          <span aria-hidden="true">â†</span>
+          <span>Back to Search Results</span>
+        </button>
+
+        <div className="trip-summary-card">
+          <div className="trip-header-main">
+            <div>
+              <span className="trip-eyebrow">SELECT YOUR SEATS</span>
+              <h1 className="trip-title">
+                {tripDetails.origin} â†’ {tripDetails.destination}
+              </h1>
+              <p className="trip-operator-info">
+                <strong>{tripDetails.operatorName}</strong> â€¢ {tripDetails.busType} â€¢ Departs at {tripDetails.departureTime}
+              </p>
+            </div>
+
+            <div className="trip-fare-badge">
+              <span className="fare-badge-label">Fare per Seat</span>
+              <span className="fare-badge-amount">â‚¹{tripDetails.baseFare}</span>
+            </div>
+          </div>
+
+          {/* Development Fixture Notice */}
+          <div className="fixture-notice-strip" role="status">
+            <span className="fixture-chip">DEMO FIXTURE</span>
+            <span>{SEAT_FIXTURE_NOTICE}</span>
+          </div>
+        </div>
+      </div>
+
+      {bookingNotice && (
+        <div className="booking-notice-banner" role="alert">
+          <span>âš ï¸ {bookingNotice}</span>
+        </div>
+      )}
+
+      {/* Main Seating & Summary Grid */}
+      <div className="seat-main-grid">
+        {/* Left: Bus Seating Layout Deck */}
+        <section className="bus-deck-section" aria-label="Seating deck">
+          <div className="deck-header">
+            <h2>Lower Deck (Seating Chart)</h2>
+            <span className="available-count-pill">
+              <strong>{seatLayout.availableSeatsCount}</strong> seats available
+            </span>
+          </div>
+
+          <SeatLayout
+            seatLayout={seatLayout}
+            selectedSeats={selectedSeats}
+            onToggleSeat={handleToggleSeat}
+            isMaxReached={isMaxReached}
+          />
+        </section>
+
+        {/* Right: Booking Summary Card */}
+        <aside className="booking-summary-sidebar" aria-label="Selected Seats Summary">
+          <div className="summary-card-inner">
+            <h2 className="summary-heading">Booking Summary</h2>
+
+            {/* Selected Seats List */}
+            <div className="selected-seats-box">
+              <div className="box-title-row">
+                <span className="box-label">Selected Seats</span>
+                <span className="box-count">
+                  {selectedSeats.length} / {MAX_SEATS_PER_BOOKING}
+                </span>
+              </div>
+
+              {selectedSeats.length === 0 ? (
+                <div className="no-seats-placeholder">
+                  <span className="placeholder-icon" aria-hidden="true">ðŸ’º</span>
+                  <p>Click on any available seat in the bus layout to select it.</p>
+                </div>
+              ) : (
+                <div className="selected-seats-chips">
+                  {selectedSeats.map((seat) => (
+                    <span key={seat.id} className="selected-chip">
+                      <strong>Seat {seat.id}</strong> ({seat.type})
+                      <button
+                        type="button"
+                        className="remove-chip-btn"
+                        onClick={() => handleRemoveSeat(seat.id)}
+                        aria-label={`Remove seat ${seat.id}`}
+                      >
+                        âœ•
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Fare Breakdown */}
+            <div className="fare-breakdown-card">
+              <div className="breakdown-row">
+                <span>Base Fare ({selectedSeats.length} {selectedSeats.length === 1 ? "seat" : "seats"})</span>
+                <span>â‚¹{totalFare}</span>
+              </div>
+              <div className="breakdown-row sub">
+                <span>GST & Transit Charges</span>
+                <span>Included</span>
+              </div>
+              <div className="breakdown-divider" />
+              <div className="breakdown-row total">
+                <span>Total Payable</span>
+                <span className="total-price">â‚¹{totalFare}</span>
+              </div>
+            </div>
+
+            {/* Continue Button */}
+            <button
+              type="button"
+              className="continue-booking-btn"
+              disabled={selectedSeats.length === 0}
+              onClick={handleContinue}
+              aria-disabled={selectedSeats.length === 0}
+            >
+              <span>{selectedSeats.length === 0 ? "Select at least 1 Seat" : `Continue with ${selectedSeats.length} ${selectedSeats.length === 1 ? "Seat" : "Seats"} â†’`}</span>
+            </button>
+
+            <p className="summary-trust-hint">
+              ðŸ”’ Safe & contactless ticketing demo for Bengal transit.
+            </p>
+          </div>
+        </aside>
+      </div>
+
+      {/* Confirmation Modal when Continue is clicked */}
+      {isCompletedModalOpen && (
+        <div className="modal-backdrop" onClick={() => setIsCompletedModalOpen(false)} role="presentation">
+          <div
+            className="seat-modal-card"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="confirm-modal-title"
+          >
+            <div className="modal-header">
+              <div className="modal-title-row">
+                <span className="modal-bus-icon" aria-hidden="true">ðŸŽŸï¸</span>
+                <div>
+                  <h3 id="confirm-modal-title">Seats Selected Successfully</h3>
+                  <p className="modal-subtitle">{tripDetails.operatorName} â€¢ {tripDetails.origin} â†’ {tripDetails.destination}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="modal-close-btn"
+                onClick={() => setIsCompletedModalOpen(false)}
+                aria-label="Close dialog"
+              >
+                âœ•
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="selection-summary-box">
+                <div className="summary-item">
+                  <span className="summary-label">Selected Seats</span>
+                  <span className="summary-value">
+                    {selectedSeats.map((s) => s.id).join(", ")} ({selectedSeats.length} {selectedSeats.length === 1 ? "Seat" : "Seats"})
+                  </span>
+                </div>
+                <div className="summary-item">
+                  <span className="summary-label">Total Fare</span>
+                  <span className="summary-value fare-highlight">
+                    â‚¹{totalFare}
+                  </span>
+                </div>
+              </div>
+
+              <div className="phase-notice-box">
+                <span className="phase-pill">PHASE 3 MILESTONE COMPLETED</span>
+                <p>
+                  Seat selection for this trip has been recorded. 
+                  Passenger personal details, boarding point selection, and payment gateway integration will follow in the next milestone.
+                </p>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="modal-secondary-btn"
+                onClick={() => setIsCompletedModalOpen(false)}
+              >
+                Modify Seats
+              </button>
+              <button
+                type="button"
+                className="modal-primary-btn"
+                onClick={() => {
+                  setIsCompletedModalOpen(false);
+                  const bookingPayload = {
+                    tripId: tripDetails.tripId,
+                    operatorName: tripDetails.operatorName,
+                    busType: tripDetails.busType,
+                    origin: tripDetails.origin,
+                    destination: tripDetails.destination,
+                    departureTime: tripDetails.departureTime,
+                    arrivalTime: tripDetails.arrivalTime,
+                    duration: tripDetails.duration,
+                    date: new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }),
+                    seats: selectedSeats.map((s) => s.id),
+                    passengerCount: selectedSeats.length,
+                    farePerSeat: tripDetails.baseFare,
+                    baseFare: totalFare,
+                    taxesAndFees: Math.round(totalFare * 0.05),
+                    totalAmount: totalFare + Math.round(totalFare * 0.05),
+                  };
+                  if (onNavigate) {
+                    onNavigate("passengers", bookingPayload);
+                  }
+                }}
+              >
+                Proceed to Passenger Details â†’
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </main>
+  );
+}
+

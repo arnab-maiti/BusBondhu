@@ -18,6 +18,9 @@ model Bus {
   updatedAt DateTime      @updatedAt
   locations BusLocation[]
   gpsDevices GpsDevice[]
+  operatorId Int?
+  operator Operator? @relation(fields: [operatorId], references: [id], onDelete: SetNull)
+  trips Trip[]
 }
 
 model BusLocation {
@@ -45,4 +48,92 @@ model GpsDevice {
   bus Bus @relation(fields: [busId], references: [id], onDelete: Cascade)
 
   @@index([busId])
+}
+model Operator {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  contact     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  routes Route[]
+  buses  Bus[]
+}
+model Route {
+  id          Int      @id @default(autoincrement())
+  name        String
+  code        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+
+  operatorId Int
+  operator   Operator @relation(fields: [operatorId], references: [id], onDelete: Restrict)
+
+  stops RouteStop[]
+  trips Trip[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([operatorId])
+  @@index([isActive])
+}
+
+model Stop {
+  id        Int      @id @default(autoincrement())
+  name      String
+  address   String?
+  latitude  Float?
+  longitude Float?
+
+  routes RouteStop[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+}
+
+model RouteStop {
+  id       Int @id @default(autoincrement())
+  routeId  Int
+  stopId   Int
+  sequence Int
+
+  route Route @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  stop  Stop  @relation(fields: [stopId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([routeId, stopId])
+  @@unique([routeId, sequence])
+  @@index([stopId])
+}
+enum TripStatus {
+  SCHEDULED
+  BOARDING
+  DEPARTED
+  COMPLETED
+  CANCELLED
+  DELAYED
+}
+
+model Trip {
+  id          Int        @id @default(autoincrement())
+  busId       Int
+  routeId     Int
+  journeyDate DateTime
+  departureTime DateTime
+  arrivalTime   DateTime
+  status      TripStatus @default(SCHEDULED)
+
+  bus   Bus   @relation(fields: [busId], references: [id], onDelete: Restrict)
+  route Route @relation(fields: [routeId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([journeyDate, status])
+  @@index([busId, journeyDate])
+  @@index([routeId, journeyDate])
 }

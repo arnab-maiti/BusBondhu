@@ -11,6 +11,15 @@ import { io } from "socket.io-client";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./App.css";
+import SearchResultsPage from "./components/Search/SearchResultsPage";
+import SeatSelectionPage from "./components/Seats/SeatSelectionPage";
+import PassengerDetailsPage from "./components/Passengers/PassengerDetailsPage";
+import PaymentPage from "./components/Payment/PaymentPage";
+import ConfirmationPage from "./components/Confirmation/ConfirmationPage";
+import LoginPage from "./components/Auth/LoginPage";
+import RegisterPage from "./components/Auth/RegisterPage";
+import MyBookingsPage from "./components/Bookings/MyBookingsPage";
+import BusTrackingPage from "./components/Tracking/BusTrackingPage";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
@@ -141,12 +150,18 @@ function useTracking() {
   const [busListError, setBusListError] = useState("");
   const [subscriptionError, setSubscriptionError] = useState("");
   const [gpsTimestamp, setGpsTimestamp] = useState(null);
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(() => Date.now());
 
   const selectedBusIdRef = useRef(null);
+  const busesRef = useRef([]);
 
-  // Keep the latest selected ID available to the persistent socket listener.
-  selectedBusIdRef.current = selectedBusId;
+  useEffect(() => {
+    selectedBusIdRef.current = selectedBusId;
+  }, [selectedBusId]);
+
+  useEffect(() => {
+    busesRef.current = buses;
+  }, [buses]);
 
   // Load the real bus list from the backend.
   useEffect(() => {
@@ -253,9 +268,7 @@ function useTracking() {
     };
   }, []);
 
-  // Keep the current bus list accessible to the socket listener.
-  const busesRef = useRef(buses);
-  busesRef.current = buses;
+
 
   // Show the selected bus's last stored location while waiting for live GPS.
   useEffect(() => {
@@ -371,38 +384,90 @@ function ConnectionBadge({ connection, stale }) {
   );
 }
 
-function BusSelector({ tracking }) {
-  return (
-    <label className="bus-selector">
-      <span>Select bus</span>
-      <select
-        value={tracking.selectedBusId ?? ""}
-        onChange={(event) => {
-          const value = event.target.value;
 
-          tracking.setSelectedBusId(
-            value === "" ? null : Number(value)
-          );
-        }}
-      >
-        <option value="">Choose a bus</option>
+function getPageFromHash() {
+  const hash = window.location.hash;
+  if (hash.startsWith("#/my-bookings")) return "my-bookings";
+  if (hash.startsWith("#/login")) return "login";
+  if (hash.startsWith("#/register")) return "register";
+  if (hash.startsWith("#/booking/payment")) return "payment";
+  if (hash.startsWith("#/booking/passengers")) return "passengers";
+  if (hash.match(/^#\/booking\/([^/?#]+)/)) return "confirmation";
+  if (hash.startsWith("#/trips/") && hash.includes("/seats")) return "seats";
+  if (hash.startsWith("#/search")) return "search";
+  if (hash.startsWith("#/track")) return "track";
+  if (hash.startsWith("#/tracking")) return "track";
+  return "dashboard";
+}
 
-        {tracking.buses.map((item) => (
-          <option key={item.id} value={item.id}>
-            {item.busNumber}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
+function getTrackTripIdFromHash() {
+  const hash = window.location.hash;
+  const match = hash.match(/^#\/track\/([^/?#]+)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function getBookingIdFromHash() {
+  const hash = window.location.hash;
+  const match = hash.match(/^#\/booking\/([^/?#]+)/);
+  if (match && match[1] !== "payment" && match[1] !== "passengers") {
+    return match[1];
+  }
+  return null;
+}
+
+function getTripIdFromHash() {
+  const hash = window.location.hash;
+  const match = hash.match(/^#\/trips\/([^/?#]+)\/seats/);
+  return match ? match[1] : "BB-101";
+}
+
+function getSearchQueryFromHash() {
+  const hash = window.location.hash;
+  if (hash.includes("?")) {
+    const queryString = hash.split("?")[1];
+    const params = new URLSearchParams(queryString);
+    return {
+      from: params.get("from") || "Kolkata",
+      to: params.get("to") || "Durgapur",
+      date: params.get("date") || new Date().toISOString().split("T")[0],
+      passengers: Number(params.get("passengers")) || 1,
+    };
+  }
+  return {
+    from: "Kolkata",
+    to: "Durgapur",
+    date: new Date().toISOString().split("T")[0],
+    passengers: 1,
+  };
 }
 
 export default function App() {
-  const [page, setPage] = useState(() =>
-    window.location.hash === "#/tracking"
-      ? "tracking"
-      : "dashboard"
-  );
+  const [page, setPage] = useState(getPageFromHash);
+  const [tripId, setTripId] = useState(getTripIdFromHash);
+  const [trackTripId, setTrackTripId] = useState(getTrackTripIdFromHash);
+  const [bookingId, setBookingId] = useState(getBookingIdFromHash);
+  const [searchQuery, setSearchQuery] = useState(getSearchQueryFromHash);
+  const [bookingData, setBookingData] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem("bb_booking_data");
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const saveBookingData = (data) => {
+    setBookingData(data);
+    try {
+      if (data) {
+        sessionStorage.setItem("bb_booking_data", JSON.stringify(data));
+      } else {
+        sessionStorage.removeItem("bb_booking_data");
+      }
+    } catch (e) {
+      console.error("Failed to save booking data to sessionStorage", e);
+    }
+  };
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [journey, setJourney] = useState({ from: "", to: "" });
@@ -412,11 +477,34 @@ export default function App() {
 
   useEffect(() => {
     const onHash = () => {
-      setPage(
-        window.location.hash === "#/tracking"
-          ? "tracking"
-          : "dashboard"
-      );
+      const newPage = getPageFromHash();
+      setPage(newPage);
+      if (newPage === "track") {
+        setTrackTripId(getTrackTripIdFromHash());
+      }
+      if (newPage === "search") {
+        setSearchQuery(getSearchQueryFromHash());
+      }
+      if (newPage === "seats") {
+        setTripId(getTripIdFromHash());
+      }
+      if (newPage === "confirmation") {
+        setBookingId(getBookingIdFromHash());
+        try {
+          const saved = sessionStorage.getItem("bb_booking_data");
+          if (saved) setBookingData(JSON.parse(saved));
+        } catch {
+          // handled gracefully
+        }
+      }
+      if (newPage === "passengers" || newPage === "payment") {
+        try {
+          const saved = sessionStorage.getItem("bb_booking_data");
+          if (saved) setBookingData(JSON.parse(saved));
+        } catch {
+          // handled gracefully
+        }
+      }
     };
 
     window.addEventListener("hashchange", onHash);
@@ -426,20 +514,70 @@ export default function App() {
     };
   }, []);
 
-  const navigate = (next) => {
-    window.location.hash =
-      next === "tracking" ? "/tracking" : "/";
+  const navigate = (next, queryParams = null) => {
+    if (next === "my-bookings") {
+      window.location.hash = "/my-bookings";
+    } else if (next === "login") {
+      window.location.hash = "/login";
+    } else if (next === "register") {
+      window.location.hash = "/register";
+    } else if (next === "confirmation") {
+      const id =
+        queryParams?.bookingId ||
+        (typeof queryParams === "string" ? queryParams : "DEMO-CONF-829103");
+      if (queryParams && typeof queryParams === "object") {
+        saveBookingData(queryParams);
+      }
+      window.location.hash = `/booking/${id}`;
+    } else if (next === "payment") {
+      if (queryParams) {
+        saveBookingData(queryParams);
+      }
+      window.location.hash = "/booking/payment";
+    } else if (next === "passengers") {
+      if (queryParams) {
+        saveBookingData(queryParams);
+      }
+      window.location.hash = "/booking/passengers";
+    } else if (next === "seats") {
+      const id = queryParams?.tripId || "BB-101";
+      window.location.hash = `/trips/${id}/seats`;
+    } else if (next === "search") {
+      if (queryParams) {
+        const searchStr = new URLSearchParams(queryParams).toString();
+        window.location.hash = `/search?${searchStr}`;
+      } else {
+        window.location.hash = "/search";
+      }
+    } else if (next === "track" || next === "tracking") {
+      const id =
+        queryParams?.tripId ||
+        (typeof queryParams === "string" ? queryParams : "");
+      if (queryParams && typeof queryParams === "object") {
+        saveBookingData(queryParams);
+      }
+      window.location.hash = id ? `/track/${encodeURIComponent(id)}` : "/track";
+    } else {
+      window.location.hash = "/";
+    }
     setMenuOpen(false);
   };
 
   const search = (event) => {
     event.preventDefault();
 
-    setSearchMessage(
-      !journey.from.trim() || !journey.to.trim()
-        ? "Enter both a starting point and destination to plan a journey."
-        : "Journey planning is not available yet. No route results have been shown."
-    );
+    if (!journey.from.trim() || !journey.to.trim()) {
+      setSearchMessage(
+        "Enter both a starting point and destination to plan a journey."
+      );
+      return;
+    }
+
+    setSearchMessage("");
+    navigate("search", {
+      from: journey.from.trim(),
+      to: journey.to.trim(),
+    });
   };
 
   const layoutKey = `${page}-${menuOpen}`;
@@ -454,7 +592,10 @@ export default function App() {
           aria-label="BusBondhu home"
         >
           <span className="brand-mark">B</span>
-          <span>BusBondhu</span>
+          <span className="brand-text">
+            <span className="brand-title">BusBondhu</span>
+            <span className="brand-tagline">Bengal Transit</span>
+          </span>
         </a>
 
         <button
@@ -465,7 +606,7 @@ export default function App() {
           onClick={() => setMenuOpen((open) => !open)}
         >
           <span className="sr-only">Toggle navigation</span>
-          <span aria-hidden="true">☰</span>
+          <span aria-hidden="true">{menuOpen ? "✕" : "☰"}</span>
         </button>
 
         <nav
@@ -473,15 +614,44 @@ export default function App() {
           className={menuOpen ? "nav-links open" : "nav-links"}
           aria-label="Primary navigation"
         >
-          <a href="#/" onClick={() => navigate("dashboard")}>
+          <a
+            href="#/"
+            className={page === "dashboard" ? "active" : ""}
+            onClick={() => navigate("dashboard")}
+          >
             Dashboard
           </a>
 
           <a
-            href="#/tracking"
-            onClick={() => navigate("tracking")}
+            href="#/search"
+            className={page === "search" ? "active" : ""}
+            onClick={() => navigate("search")}
+          >
+            Find Buses
+          </a>
+
+          <a
+            href="#/my-bookings"
+            className={page === "my-bookings" ? "active" : ""}
+            onClick={() => navigate("my-bookings")}
+          >
+            My Bookings
+          </a>
+
+          <a
+            href="#/track"
+            className={page === "track" ? "active" : ""}
+            onClick={() => navigate("track")}
           >
             Live tracking
+          </a>
+
+          <a
+            href="#/login"
+            className={page === "login" || page === "register" ? "active" : ""}
+            onClick={() => navigate("login")}
+          >
+            Sign in
           </a>
 
           {page === "dashboard" && (
@@ -495,116 +665,45 @@ export default function App() {
         </nav>
       </header>
 
-      {page === "tracking" ? (
-        <main className="live-page">
-          <div className="live-heading">
-            <div>
-              <p className="eyebrow">LIVE TRACKING</p>
-              <h1>Follow reported service locations</h1>
-              <p>
-                Only locations received from the tracking feed appear
-                on this map.
-              </p>
-            </div>
-
-            <ConnectionBadge
-              connection={tracking.connection}
-              stale={tracking.stale}
-            />
-          </div>
-
-          <BusSelector tracking={tracking} />
-
-          {tracking.busListError && (
-            <p className="form-message" role="alert">
-              {tracking.busListError}
-            </p>
-          )}
-
-          {tracking.subscriptionError && (
-            <p className="form-message" role="alert">
-              {tracking.subscriptionError}
-            </p>
-          )}
-
-          <div className="live-layout">
-            <section className="live-map-panel">
-              <TrackingMap
-                bus={tracking.bus}
-                layoutKey={layoutKey}
-                large
-              />
-
-              <p className="map-notice">
-                Use the map controls to explore. A marker appears
-                when a valid location is available.
-              </p>
-            </section>
-
-            <aside className="selected-bus-panel" aria-live="polite">
-              {tracking.bus ? (
-                <>
-                  <p className="eyebrow">SELECTED BUS</p>
-                  <h2>{tracking.bus.busNumber || "Tracked bus"}</h2>
-
-                  <dl>
-                    <div>
-                      <dt>Reported position</dt>
-                      <dd className="coordinates">
-                        {tracking.bus.latitude.toFixed(5)},{" "}
-                        {tracking.bus.longitude.toFixed(5)}
-                      </dd>
-                    </div>
-
-                    {Number.isFinite(tracking.bus.speed) && (
-                      <div>
-                        <dt>Reported speed</dt>
-                        <dd>
-                          {tracking.bus.speed} <small>km/h</small>
-                        </dd>
-                      </div>
-                    )}
-
-                    {tracking.gpsTimestamp && (
-                      <div>
-                        <dt>Last GPS update</dt>
-                        <dd className="timestamp">
-                          {new Date(
-                            tracking.gpsTimestamp
-                          ).toLocaleString()}
-                        </dd>
-                      </div>
-                    )}
-                  </dl>
-
-                  {tracking.stale && (
-                    <p className="tracking-warning">
-                      This location is older than two minutes based
-                      on its supplied timestamp.
-                    </p>
-                  )}
-                </>
-              ) : (
-                <>
-                  <p className="eyebrow">SELECTED BUS</p>
-                  <h2>
-                    {tracking.selectedBusId === null
-                      ? "Choose a bus"
-                      : "No location received"}
-                  </h2>
-
-                  <p className="panel-copy">
-                    {tracking.connection === "connecting"
-                      ? "Connecting to the tracking service…"
-                      : tracking.connection !== "connected"
-                        ? "The tracking service is unavailable. Reconnect to receive bus locations."
-                        : "No valid location is currently available for this bus."}
-                  </p>
-                </>
-              )}
-            </aside>
-          </div>
-        </main>
+      {page === "my-bookings" ? (
+        <MyBookingsPage onNavigate={navigate} />
+      ) : page === "login" ? (
+        <LoginPage onNavigate={navigate} />
+      ) : page === "register" ? (
+        <RegisterPage onNavigate={navigate} />
+      ) : page === "confirmation" ? (
+        <ConfirmationPage
+          bookingId={bookingId}
+          bookingData={bookingData}
+          onNavigate={navigate}
+        />
+      ) : page === "payment" ? (
+        <PaymentPage
+          bookingData={bookingData}
+          onNavigate={navigate}
+        />
+      ) : page === "passengers" ? (
+        <PassengerDetailsPage
+          bookingData={bookingData}
+          onNavigate={navigate}
+        />
+      ) : page === "seats" ? (
+        <SeatSelectionPage
+          tripId={tripId}
+          onNavigate={navigate}
+        />
+      ) : page === "search" ? (
+        <SearchResultsPage
+          initialQuery={searchQuery}
+          onNavigate={navigate}
+        />
+      ) : page === "track" ? (
+        <BusTrackingPage
+          tripId={trackTripId}
+          tracking={tracking}
+          bookingData={bookingData}
+          onNavigate={navigate}
+        />
       ) : (
         <main id="top">
           <section className="hero" aria-labelledby="hero-title">
@@ -697,8 +796,8 @@ export default function App() {
 
               <a
                 className="text-link"
-                href="#/tracking"
-                onClick={() => navigate("tracking")}
+                href="#/track"
+                onClick={() => navigate("track")}
               >
                 Open live map →
               </a>
@@ -711,13 +810,17 @@ export default function App() {
                 <p className="eyebrow">JOURNEY PLANNING</p>
                 <h2>Find your best way forward</h2>
                 <p>
-                  Search is ready for connection when route-planning
-                  data becomes available.
+                  Explore scheduled bus departures, compare fares, and
+                  check seat availability across operators.
                 </p>
               </div>
 
-              <a className="text-link" href="#journey">
-                Start a search →
+              <a
+                className="text-link"
+                href="#/search"
+                onClick={() => navigate("search")}
+              >
+                Find bus routes →
               </a>
             </article>
           </section>
@@ -766,8 +869,8 @@ export default function App() {
 
                 <a
                   className="text-link"
-                  href="#/tracking"
-                  onClick={() => navigate("tracking")}
+                  href="#/track"
+                  onClick={() => navigate("track")}
                 >
                   Open live tracking →
                 </a>
