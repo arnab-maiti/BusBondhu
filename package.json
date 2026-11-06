@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run --root .",
+    "test:db:setup": "node scripts/setup-test-db.js",
     "test:verify": "node tests/verify-backend.js"
   },
   "dependencies": {

@@ -3,18 +3,63 @@ import process from "node:process";
 import { Server } from "socket.io";
 import { io as ClientIo } from "socket.io-client";
 import dotenv from "dotenv";
-import app from "../src/app.js";
-import { initBusSocket } from "../src/sockets/bus.socket.js";
-import { prisma } from "../src/config/database.js";
+import {
+  assertTestDatabaseIdentity,
+  getTestDatabaseConfig,
+  redactDatabaseSecrets,
+} from "./support/database-safety.js";
 import { generateGpsApiKey, hashGpsApiKey } from "../src/utils/gpsKeys.js";
 
-dotenv.config();
+dotenv.config({ quiet: true });
+
+// This verification script always uses the dedicated test database.
+// src/config/database.js refuses to fall back to DATABASE_URL in this mode.
+process.env.NODE_ENV = "test";
 
 const TEST_PORT = 5055;
 const BASE_URL = `http://localhost:${TEST_PORT}`;
 
+async function closeSocketServer(io) {
+  if (!io) {
+    return;
+  }
+
+  await new Promise((resolve) => io.close(() => resolve()));
+}
+
+async function closeHttpServer(server) {
+  if (!server || !server.listening) {
+    return;
+  }
+
+  await new Promise((resolve) => {
+    server.close(() => resolve());
+
+    if (typeof server.closeAllConnections === "function") {
+      server.closeAllConnections();
+    }
+  });
+}
+
 async function runVerification() {
   console.log("=== BusBondhu Backend Phase 1 Verification ===");
+
+  // Validate the dedicated test database before importing any application
+  // module. This fails safely instead of falling back to DATABASE_URL.
+  getTestDatabaseConfig();
+  console.log("✓ Dedicated test database configuration validated.");
+
+  const [
+    { default: app },
+    { initBusSocket },
+    { prisma },
+  ] = await Promise.all([
+    import("../src/app.js"),
+    import("../src/sockets/bus.socket.js"),
+    import("../src/config/database.js"),
+  ]);
+
+  await assertTestDatabaseIdentity(prisma);
 
   // 1. Start Server on test port
   console.log("\n1. Starting HTTP server & Socket.IO...");
@@ -25,7 +70,29 @@ async function runVerification() {
   app.set("io", io);
   initBusSocket(io);
 
-  await new Promise((resolve) => server.listen(TEST_PORT, resolve));
+  try {
+    await new Promise((resolve, reject) => {
+      const onError = (error) => {
+        server.off("listening", onListening);
+        reject(error);
+      };
+
+      const onListening = () => {
+        server.off("error", onError);
+        resolve();
+      };
+
+      server.once("error", onError);
+      server.once("listening", onListening);
+      server.listen(TEST_PORT);
+    });
+  } catch (error) {
+    await prisma.$disconnect().catch(() => {});
+    await closeSocketServer(io);
+    await closeHttpServer(server);
+    throw error;
+  }
+
   console.log(`✓ Server running at ${BASE_URL}`);
 
   let testOperatorId = null;
@@ -357,6 +424,7 @@ async function runVerification() {
       }
       console.log(`✓ GPS Rate Limiter triggered 429 Too Many Requests as expected`);
     } finally {
+      await assertTestDatabaseIdentity(prisma);
       await prisma.gpsDevice.delete({ where: { id: rateLimitDevice.id } });
     }
 
@@ -369,24 +437,43 @@ async function runVerification() {
     if (socketClient) {
       socketClient.disconnect();
     }
-    if (testGpsDeviceId) {
-      await prisma.gpsDevice.deleteMany({ where: { id: testGpsDeviceId } });
-    }
-    if (testBusId) {
-      await prisma.busLocation.deleteMany({ where: { busId: testBusId } });
-      await prisma.bus.deleteMany({ where: { id: testBusId } });
-    }
-    if (testOperatorId) {
-      await prisma.operator.deleteMany({ where: { id: testOperatorId } });
-    }
 
-    await prisma.$disconnect();
-    server.close();
-    console.log("✓ Cleanup completed.");
+    try {
+      if (testGpsDeviceId || testBusId || testOperatorId) {
+        await assertTestDatabaseIdentity(prisma);
+      }
+      if (testGpsDeviceId) {
+        await prisma.gpsDevice.deleteMany({ where: { id: testGpsDeviceId } });
+      }
+      if (testBusId) {
+        await prisma.busLocation.deleteMany({ where: { busId: testBusId } });
+        await prisma.bus.deleteMany({ where: { id: testBusId } });
+      }
+      if (testOperatorId) {
+        await prisma.operator.deleteMany({ where: { id: testOperatorId } });
+      }
+      console.log("✓ Cleanup completed.");
+    } finally {
+      await prisma.$disconnect().catch(() => {});
+      await closeSocketServer(io);
+      await closeHttpServer(server);
+    }
   }
 }
 
-runVerification().catch((err) => {
-  console.error("\n❌ Verification failed:", err);
-  process.exit(1);
+runVerification().catch((error) => {
+  const message = redactDatabaseSecrets(
+    error?.stack || error?.message || error,
+    [process.env.TEST_DATABASE_URL, process.env.DATABASE_URL]
+  );
+
+  console.error("\n❌ Verification failed:", message);
+
+  if (/Test database safety check failed/.test(message)) {
+    console.error(
+      "TEST_DATABASE_URL must point to a dedicated test database. Run `npm run test:db:setup` if it is not configured."
+    );
+  }
+
+  process.exitCode = 1;
 });

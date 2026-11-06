@@ -1,52 +1,64 @@
-
-import { afterAll, beforeAll, describe, it, expect } from "vitest";
+import {
+  afterAll,
+  beforeAll,
+  describe,
+  it,
+  expect,
+  inject,
+} from "vitest";
 import dotenv from "dotenv";
-import process from "node:process";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "@prisma/client";
 import { generateGpsApiKey, hashGpsApiKey } from "../src/utils/gpsKeys.js";
-dotenv.config();
-const BASE_URL = process.env.API_BASE_URL ?? "http://localhost:5000";
-const prisma = new PrismaClient({
-  adapter: new PrismaPg({
-    connectionString: process.env.DATABASE_URL,
-  }),
-});
+import {
+  assertTestDatabaseIdentity,
+} from "./support/database-safety.js";
+import { createGuardedTestPrisma } from "./support/test-prisma.js";
+
+dotenv.config({ quiet: true });
+
+let BASE_URL;
+let GPS_BUS_ID;
+let prisma;
 let gpsApiKey;
 let gpsDeviceId;
+
 beforeAll(async () => {
+  BASE_URL = inject("apiBaseUrl");
+  GPS_BUS_ID = inject("gpsBusId");
+  prisma = await createGuardedTestPrisma();
+
   const bus = await prisma.bus.findUnique({
-    where: { id: 1 },
+    where: { id: GPS_BUS_ID },
     select: { id: true },
   });
 
   if (!bus) {
-    throw new Error("API tests require bus with ID 1");
+    throw new Error("API tests require the fixture GPS bus");
   }
 
   gpsApiKey = generateGpsApiKey();
- const device = await prisma.gpsDevice.create({
-  data: {
-    name: "API test device",
-    keyHash: hashGpsApiKey(gpsApiKey),
-    busId: bus.id,
-  },
-  select: {
-    id: true,
-  },
-});
+  const device = await prisma.gpsDevice.create({
+    data: {
+      name: "API test device",
+      keyHash: hashGpsApiKey(gpsApiKey),
+      busId: bus.id,
+    },
+    select: {
+      id: true,
+    },
+  });
 
-gpsDeviceId = device.id;
+  gpsDeviceId = device.id;
 });
 
 afterAll(async () => {
-  if (gpsDeviceId) {
-  await prisma.gpsDevice.deleteMany({
-    where: { id: gpsDeviceId },
-  });
-}
+  if (prisma && gpsDeviceId) {
+    await assertTestDatabaseIdentity(prisma);
+    await prisma.gpsDevice.deleteMany({
+      where: { id: gpsDeviceId },
+    });
+  }
 
-  await prisma.$disconnect();
+  await prisma?.$disconnect();
 });
 
 describe("BusBondhu API", () => {
@@ -80,18 +92,21 @@ describe("BusBondhu API", () => {
   });
 
   it("POST location with invalid latitude should return 400", async () => {
-    const response = await fetch(`${BASE_URL}/api/buses/1/location`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": gpsApiKey,
-      },
-      body: JSON.stringify({
-        latitude: 95,
-        longitude: 88.3639,
-        speed: 25,
-      }),
-    });
+    const response = await fetch(
+      `${BASE_URL}/api/buses/${GPS_BUS_ID}/location`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": gpsApiKey,
+        },
+        body: JSON.stringify({
+          latitude: 95,
+          longitude: 88.3639,
+          speed: 25,
+        }),
+      }
+    );
 
     const body = await response.json();
 
@@ -106,14 +121,14 @@ it("GPS endpoint should return 429 after exceeding the rate limit", async () => 
     data: {
       name: "API rate-limit test device",
       keyHash: hashGpsApiKey(rateLimitApiKey),
-      busId: 1,
+      busId: GPS_BUS_ID,
     },
     select: { id: true },
   });
 
   try {
     const requests = Array.from({ length: 65 }, () =>
-      fetch(`${BASE_URL}/api/buses/1/location`, {
+      fetch(`${BASE_URL}/api/buses/${GPS_BUS_ID}/location`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -132,6 +147,7 @@ it("GPS endpoint should return 429 after exceeding the rate limit", async () => 
 
     expect(statuses).toContain(429);
   } finally {
+    await assertTestDatabaseIdentity(prisma);
     await prisma.gpsDevice.delete({
       where: { id: rateLimitDevice.id },
     });
@@ -140,7 +156,7 @@ it("GPS endpoint should return 429 after exceeding the rate limit", async () => 
 
 it("GPS endpoint should reject a missing API key", async () => {
   const response = await fetch(
-    `${BASE_URL}/api/buses/1/location`,
+    `${BASE_URL}/api/buses/${GPS_BUS_ID}/location`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -157,7 +173,7 @@ it("GPS endpoint should reject a missing API key", async () => {
 
 it("GPS endpoint should reject an invalid API key", async () => {
   const response = await fetch(
-    `${BASE_URL}/api/buses/1/location`,
+    `${BASE_URL}/api/buses/${GPS_BUS_ID}/location`,
     {
       method: "POST",
       headers: {
@@ -181,18 +197,21 @@ it("GPS endpoint should reject an inactive device", async () => {
     data: { isActive: false },
   });
 
-  const response = await fetch(`${BASE_URL}/api/buses/1/location`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": gpsApiKey,
-    },
-    body: JSON.stringify({
-      latitude: 22.5726,
-      longitude: 88.3639,
-      speed: 20,
-    }),
-  });
+  const response = await fetch(
+    `${BASE_URL}/api/buses/${GPS_BUS_ID}/location`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": gpsApiKey,
+      },
+      body: JSON.stringify({
+        latitude: 22.5726,
+        longitude: 88.3639,
+        speed: 20,
+      }),
+    }
+  );
 
   expect(response.status).toBe(401);
 
@@ -205,7 +224,7 @@ it("GPS endpoint should reject an inactive device", async () => {
 
 it("GPS device should not update another bus", async () => {
   const otherBus = await prisma.bus.findFirst({
-    where: { id: { not: 1 } },
+    where: { id: { not: GPS_BUS_ID } },
     select: { id: true },
   });
 
@@ -238,18 +257,21 @@ it("should update lastUsedAt after GPS authentication", async () => {
     data: { lastUsedAt: null },
   });
 
-  const response = await fetch(`${BASE_URL}/api/buses/1/location`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": gpsApiKey,
-    },
-    body: JSON.stringify({
-      latitude: 22.5726,
-      longitude: 88.3639,
-      speed: 20,
-    }),
-  });
+  const response = await fetch(
+    `${BASE_URL}/api/buses/${GPS_BUS_ID}/location`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": gpsApiKey,
+      },
+      body: JSON.stringify({
+        latitude: 22.5726,
+        longitude: 88.3639,
+        speed: 20,
+      }),
+    }
+  );
 
   expect(response.status).toBe(201);
 
